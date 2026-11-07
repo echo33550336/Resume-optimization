@@ -268,14 +268,26 @@
         <div><label>完整简历内容 <button type="button" class="upload-btn" data-target="resume">📎 上传文件</button></label><textarea id="resume" style="min-height: 260px;" placeholder="粘贴你的完整简历内容，或上传 PDF/Word/图片…"></textarea></div>
         <div class="row">
           <div>
+            <label>岗位类型</label>
+            <select id="roleType">
+              <option value="general">通用</option>
+              <option value="tech">技术开发</option>
+              <option value="product">产品</option>
+              <option value="data">数据</option>
+              <option value="ops">运营</option>
+              <option value="design">设计</option>
+              <option value="marketing">市场</option>
+            </select>
+          </div>
+          <div>
             <label>模型</label>
             <select id="model">
               <option value="hunyuan-2.0-instruct-20251111">Hunyuan 2.0 Instruct（推荐）</option>
               <option value="hunyuan-2.0-thinking-20251109">Hunyuan 2.0 Thinking</option>
             </select>
           </div>
-          <div><label>操作</label><button class="btn" id="optimizeBtn">开始优化简历</button></div>
         </div>
+        <div><label>操作</label><button class="btn" id="optimizeBtn">开始优化简历</button></div>
       </section>
     </div>
     <section class="result">
@@ -496,7 +508,7 @@
       const r = await fetch('/api/optimize', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ company: $('company').value.trim(), position: $('position').value.trim(), jd, resume, model: $('model').value }),
+        body: JSON.stringify({ company: $('company').value.trim(), position: $('position').value.trim(), jd, resume, model: $('model').value, roleType: $('roleType').value }),
       });
       const j = await r.json();
       if (!r.ok) throw new Error(j.error || r.statusText);

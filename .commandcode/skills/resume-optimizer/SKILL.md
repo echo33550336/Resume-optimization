@@ -21,8 +21,9 @@ resume, delivered as a diagnosis, a rewritten resume, change notes, and risk tip
 Collect these before running:
 
 1. **Target position** — company + role (e.g. "字节跳动 AI 产品经理").
-2. **Job description (JD)** — full text. Accept pasted text or extracted from a file (PDF/DOCX/TXT/image via OCR).
-3. **Resume** — full text. Accept pasted text or extracted from a file.
+2. **Job type** — one of: tech, product, data, ops, design, marketing, general. Adjusts optimization focus.
+3. **Job description (JD)** — full text. Accept pasted text or extracted from a file (PDF/DOCX/TXT/image via OCR).
+4. **Resume** — full text. Accept pasted text or extracted from a file.
 
 If any input is missing, ask the user. Do not fabricate resume content.
 
