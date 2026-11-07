@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN" data-theme="brand" data-font="default" data-bg="none">
+<html lang="zh-CN" data-theme="brand" data-font="default" data-bg="image">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -10,7 +10,6 @@
 <style>
   :root { --radius: 12px; --radius-sm: 8px; --radius-lg: 18px; }
 
-  /* 品牌主题：蓝 + 紫，无绿色 */
   [data-theme="brand"] {
     --bg: #f0eadc; --bg-grad: radial-gradient(1200px 700px at 15% -5%, rgba(212,175,55,0.14) 0%, transparent 55%), radial-gradient(1000px 600px at 85% 10%, rgba(184,134,11,0.10) 0%, transparent 60%), linear-gradient(180deg, #f0eadc 0%, #e8e0cc 100%);
     --panel: #fffdf7; --panel2: #f5efe0; --border: #e6ddc4;
@@ -19,7 +18,6 @@
     --warn: #c0392b; --ok: #b8860b; --danger: #c0392b;
     --shadow: 0 6px 24px rgba(184,134,11,0.12); --header-bg: rgba(255,253,247,0.85);
   }
-  /* 琥珀金 */
   [data-theme="job51"] {
     --bg: #f0eadc; --bg-grad: radial-gradient(1200px 700px at 15% -5%, rgba(212,175,55,0.12) 0%, transparent 55%), radial-gradient(1000px 600px at 85% 10%, rgba(200,120,30,0.10) 0%, transparent 60%), linear-gradient(180deg, #f0eadc 0%, #e8e0cc 100%);
     --panel: #fffdf7; --panel2: #f3ecda; --border: #e2d6b0;
@@ -28,7 +26,6 @@
     --warn: #c0392b; --ok: #a0780a; --danger: #c0392b;
     --shadow: 0 6px 24px rgba(160,120,10,0.12); --header-bg: rgba(255,253,247,0.85);
   }
-  /* 深色 */
   [data-theme="dark"] {
     --bg: #1a1610; --bg-grad: radial-gradient(1200px 700px at 15% -5%, rgba(212,175,55,0.22) 0%, transparent 55%), radial-gradient(1000px 600px at 85% 10%, rgba(184,134,11,0.16) 0%, transparent 60%), linear-gradient(180deg, #1a1610 0%, #241e14 100%);
     --panel: #241e14; --panel2: #2e261a; --border: #3d3320;
@@ -63,9 +60,6 @@
   header { padding: 14px 32px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; gap: 16px; background: var(--header-bg); backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 20; }
   .logo-img { height: 40px; width: auto; display: block; }
   .brand { display: flex; align-items: center; gap: 10px; cursor: pointer; }
-  .logo-mark { width: 38px; height: 38px; }
-  .brand-text h1 { margin: 0; font-size: 17px; font-weight: 800; letter-spacing: 0.5px; }
-  .brand-text .sub { color: var(--muted); font-size: 11px; }
   .header-right { display: flex; align-items: center; gap: 10px; }
   .badge { padding: 4px 10px; border-radius: 999px; background: var(--panel2); border: 1px solid var(--border); font-size: 12px; color: var(--muted); }
   .icon-btn { width: 36px; height: 36px; border-radius: 8px; border: 1px solid var(--border); background: var(--panel); color: var(--text); cursor: pointer; display: grid; place-items: center; font-size: 16px; transition: all .15s; }
@@ -79,24 +73,44 @@
   @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
 
   /* Landing */
-  .hero { max-width: 1100px; margin: 0 auto; padding: 70px 24px 40px; text-align: center; position: relative; }
+  .hero { max-width: 1100px; margin: 0 auto; padding: 60px 24px 30px; text-align: center; position: relative; }
   .hero h2 { font-size: 46px; font-weight: 900; margin: 0 0 16px; line-height: 1.15; letter-spacing: -0.5px; }
   .hero h2 .hl { background: linear-gradient(135deg, var(--accent), var(--accent2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
-  .hero p { color: var(--muted); font-size: 17px; max-width: 640px; margin: 0 auto 32px; line-height: 1.7; }
+  .hero p { color: var(--muted); font-size: 17px; max-width: 640px; margin: 0 auto 28px; line-height: 1.7; }
   .hero-cta { display: inline-flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
   .hero-cta .btn { width: auto; padding: 14px 28px; font-size: 16px; }
 
-  .features { max-width: 1100px; margin: 0 auto; padding: 20px 24px 60px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+  .section-title { max-width: 1100px; margin: 0 auto; padding: 10px 24px 14px; }
+  .section-title h3 { font-size: 22px; margin: 0 0 4px; font-weight: 800; }
+  .section-title p { color: var(--muted); font-size: 13px; margin: 0; }
+
+  .features { max-width: 1100px; margin: 0 auto; padding: 10px 24px 40px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
   @media (max-width: 900px) { .features { grid-template-columns: 1fr; } .hero h2 { font-size: 32px; } }
-  .feat { background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 24px; box-shadow: var(--shadow); transition: transform .2s; backdrop-filter: blur(4px); }
+  .feat { background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 22px; box-shadow: var(--shadow); transition: transform .2s; backdrop-filter: blur(4px); }
   .feat:hover { transform: translateY(-4px); }
-  .feat .icon { width: 44px; height: 44px; border-radius: 12px; background: var(--accent-soft); color: var(--accent); display: grid; place-items: center; margin-bottom: 14px; }
+  .feat .icon { width: 44px; height: 44px; border-radius: 12px; background: var(--accent-soft); color: var(--accent); display: grid; place-items: center; margin-bottom: 12px; }
   .feat .icon svg { width: 22px; height: 22px; }
   .feat h3 { margin: 0 0 6px; font-size: 16px; font-weight: 700; }
   .feat p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.6; }
 
-  .steps { max-width: 1100px; margin: 0 auto; padding: 0 24px 60px; }
-  .steps h3 { text-align: center; font-size: 22px; margin-bottom: 24px; }
+  /* Tech stack section */
+  .tech-section { max-width: 1100px; margin: 0 auto; padding: 10px 24px 40px; }
+  .tech-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  @media (max-width: 900px) { .tech-grid { grid-template-columns: 1fr 1fr; } }
+  .tech-card { background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; box-shadow: var(--shadow); display: flex; align-items: center; gap: 12px; }
+  .tech-card .ticon { width: 36px; height: 36px; border-radius: 8px; background: var(--accent-soft); color: var(--accent); display: grid; place-items: center; font-weight: 800; font-size: 13px; flex-shrink: 0; }
+  .tech-card .tname { font-weight: 700; font-size: 14px; }
+  .tech-card .tdesc { color: var(--muted); font-size: 11px; }
+
+  /* Highlights */
+  .highlights { max-width: 1100px; margin: 0 auto; padding: 10px 24px 40px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 900px) { .highlights { grid-template-columns: 1fr; } }
+  .hl-card { background: linear-gradient(135deg, var(--accent-soft), var(--panel)); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px; box-shadow: var(--shadow); }
+  .hl-card h4 { margin: 0 0 6px; font-size: 15px; font-weight: 700; color: var(--accent); }
+  .hl-card p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.6; }
+
+  .steps { max-width: 1100px; margin: 0 auto; padding: 0 24px 50px; }
+  .steps h3 { text-align: center; font-size: 22px; margin-bottom: 20px; }
   .step-list { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
   @media (max-width: 900px) { .step-list { grid-template-columns: 1fr 1fr; } }
   .step { background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; text-align: center; box-shadow: var(--shadow); }
@@ -141,6 +155,8 @@
   .examples { display: flex; gap: 8px; flex-wrap: wrap; }
   .chip { padding: 6px 12px; border-radius: 999px; background: var(--panel2); border: 1px solid var(--border); font-size: 12px; cursor: pointer; color: var(--muted); transition: all .15s; }
   .chip:hover { color: var(--accent); border-color: var(--accent); background: var(--accent-soft); }
+
+  .meta { display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--muted); gap: 10px; flex-wrap: wrap; }
 
   .upload-btn { background: transparent; border: 1px solid var(--border); color: var(--muted); border-radius: 6px; padding: 2px 8px; font-size: 11px; cursor: pointer; margin-left: 8px; vertical-align: middle; transition: all .15s; }
   .upload-btn:hover { border-color: var(--accent); color: var(--accent); }
@@ -187,6 +203,8 @@
       <button class="btn btn-secondary" onclick="loadExampleAndGo()">先看示例</button>
     </div>
   </section>
+
+  <div class="section-title"><h3>核心能力</h3><p>围绕简历优化的完整链路，从诊断到交付</p></div>
   <section class="features">
     <div class="feat"><div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/></svg></div><h3>JD 精准匹配</h3><p>基于岗位要求深度分析，突出与 JD 高度相关的经历与关键词。</p></div>
     <div class="feat"><div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></div><h3>STAR 法则重写</h3><p>每条经历用 STAR 法则重写，量化成果，告别空洞描述。</p></div>
@@ -195,6 +213,29 @@
     <div class="feat"><div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div><h3>秒级生成</h3><p>大模型驱动，几秒输出完整优化简历。</p></div>
     <div class="feat"><div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 6v6c0 5 3.5 9.5 8 10 4.5-.5 8-5 8-10V6z"/><path d="m9 12 2 2 4-4"/></svg></div><h3>隐私安全</h3><p>简历仅在本地与模型间传输，不存储。</p></div>
   </section>
+
+  <div class="section-title"><h3>技术栈</h3><p>零依赖后端 + 可插拔文档解析，开箱即用</p></div>
+  <section class="tech-section">
+    <div class="tech-grid">
+      <div class="tech-card"><div class="ticon">N</div><div><div class="tname">Node.js</div><div class="tdesc">原生 http，零框架依赖</div></div></div>
+      <div class="tech-card"><div class="ticon">AI</div><div><div class="tname">Hunyuan 2.0</div><div class="tdesc">腾讯混元大模型</div></div></div>
+      <div class="tech-card"><div class="ticon">P</div><div><div class="tname">pdf-parse</div><div class="tdesc">PDF 简历文本提取</div></div></div>
+      <div class="tech-card"><div class="ticon">W</div><div><div class="tname">mammoth</div><div class="tdesc">DOCX 简历文本提取</div></div></div>
+      <div class="tech-card"><div class="ticon">O</div><div><div class="tname">Tesseract.js</div><div class="tdesc">图片 OCR（中英）</div></div></div>
+      <div class="tech-card"><div class="ticon">UI</div><div><div class="tname">原生 HTML/CSS/JS</div><div class="tdesc">无前端框架，轻量</div></div></div>
+      <div class="tech-card"><div class="ticon">MD</div><div><div class="tname">Markdown</div><div class="tdesc">结构化输出渲染</div></div></div>
+      <div class="tech-card"><div class="ticon">⚙</div><div><div class="tname">主题系统</div><div class="tdesc">金色/字体/背景可切换</div></div></div>
+    </div>
+  </section>
+
+  <div class="section-title"><h3>产品亮点</h3><p>不只是改 wording，而是匹配岗位的系统性优化</p></div>
+  <section class="highlights">
+    <div class="hl-card"><h4>匹配度诊断</h4><p>0-100 分量化评分，附具体差距理由，让求职者清楚知道哪里需要补强。</p></div>
+    <div class="hl-card"><h4>STAR 法则重写</h4><p>每条经历按 Situation-Task-Action-Result 重写，突出可量化的成果。</p></div>
+    <div class="hl-card"><h4>多格式输入</h4><p>支持文本粘贴与 PDF/Word/图片上传，自动提取简历与 JD 文本。</p></div>
+    <div class="hl-card"><h4>隐私安全</h4><p>简历仅在本地与模型间传输，不落库、不存储，用完即走。</p></div>
+  </section>
+
   <section class="steps">
     <h3>三步完成优化</h3>
     <div class="step-list">
@@ -263,7 +304,7 @@
     <div class="group">
       <label>背景图案</label>
       <div class="bg-options">
-        <div class="bg-card" data-bg="none"><div class="bg-preview" style="background:#f4f6fb"></div>无</div>
+        <div class="bg-card" data-bg="none"><div class="bg-preview" style="background:#f0eadc"></div>无</div>
         <div class="bg-card" data-bg="dots"><div class="bg-preview" style="background:radial-gradient(circle,#b8860b 1px,transparent 1px);background-size:8px 8px"></div>点阵</div>
         <div class="bg-card" data-bg="grid"><div class="bg-preview" style="background:linear-gradient(#e2d6b0 1px,transparent 1px),linear-gradient(90deg,#e2d6b0 1px,transparent 1px);background-size:8px 8px"></div>网格</div>
         <div class="bg-card" data-bg="image"><div class="bg-preview" style="background:url(/bg.svg);background-size:cover"></div>背景图</div>
@@ -286,7 +327,6 @@
 </div>
 
 <input type="file" id="fileInput" style="display:none" accept=".txt,.md,.csv,.pdf,.docx,.png,.jpg,.jpeg,.webp,.bmp,.tiff" />
-
 <div class="toast" id="toast"></div>
 
 <script>
@@ -306,7 +346,7 @@
   function applySettings(s) {
     const theme = s.theme || 'brand';
     const font = s.font || 'default';
-    const bg = s.bg || 'none';
+    const bg = s.bg || 'image';
     document.documentElement.setAttribute('data-theme', theme);
     document.documentElement.setAttribute('data-font', font);
     document.documentElement.setAttribute('data-bg', bg);
@@ -342,40 +382,6 @@
       resume: `李四 | 女 | 25 岁\n求职意向：数据分析师\n\n教育：XX 大学 统计学 硕士 2021-2024\n\n实习：某互联网公司 数据分析实习生 2023.06-2023.12\n- 做数据报表\n- 用 SQL 查询数据\n- 参与用户行为分析\n\n技能：SQL, Python, Tableau`
     }
   };
-
-  // ===== File upload =====
-  let uploadTarget = null;
-  document.querySelectorAll('.upload-btn').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      uploadTarget = btn.dataset.target;
-      $('fileInput').value = '';
-      $('fileInput').click();
-    });
-  });
-  $('fileInput').addEventListener('change', async (e) => {
-    const file = e.target.files && e.target.files[0];
-    if (!file || !uploadTarget) return;
-    showToast('正在提取文本…');
-    try {
-      const reader = new FileReader();
-      reader.onload = async () => {
-        const base64 = reader.result.split(',')[1];
-        const r = await fetch('/api/extract', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ filename: file.name, data: base64 }),
-        });
-        const j = await r.json();
-        if (!r.ok) throw new Error(j.error || r.statusText);
-        const ta = $(uploadTarget);
-        ta.value = (ta.value ? ta.value + '\n\n' : '') + j.text;
-        showToast('文本提取完成');
-      };
-      reader.readAsDataURL(file);
-    } catch (err) {
-      showToast('提取失败：' + err.message);
-    }
-  });
 
   document.querySelectorAll('.chip').forEach((c) => {
     c.addEventListener('click', () => {
@@ -443,6 +449,40 @@
     html = html.replace(/(<\/pre>)<\/p>/g, '$1');
     return html;
   }
+
+  // ===== File upload =====
+  let uploadTarget = null;
+  document.querySelectorAll('.upload-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      uploadTarget = btn.dataset.target;
+      $('fileInput').value = '';
+      $('fileInput').click();
+    });
+  });
+  $('fileInput').addEventListener('change', async (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file || !uploadTarget) return;
+    showToast('正在提取文本…');
+    try {
+      const reader = new FileReader();
+      reader.onload = async () => {
+        const base64 = reader.result.split(',')[1];
+        const r = await fetch('/api/extract', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ filename: file.name, data: base64 }),
+        });
+        const j = await r.json();
+        if (!r.ok) throw new Error(j.error || r.statusText);
+        const ta = $(uploadTarget);
+        ta.value = (ta.value ? ta.value + '\n\n' : '') + j.text;
+        showToast('文本提取完成');
+      };
+      reader.readAsDataURL(file);
+    } catch (err) {
+      showToast('提取失败：' + err.message);
+    }
+  });
 
   $('optimizeBtn').addEventListener('click', async () => {
     const jd = $('jd').value.trim();
