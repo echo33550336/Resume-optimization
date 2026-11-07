@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" width="1440" height="900">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#faf6ec"/>
+      <stop offset="50%" stop-color="#f5efe0"/>
+      <stop offset="100%" stop-color="#faf7f0"/>
+    </linearGradient>
+    <radialGradient id="blob1" cx="20%" cy="15%" r="40%">
+      <stop offset="0%" stop-color="#d4af37" stop-opacity="0.22"/>
+      <stop offset="100%" stop-color="#d4af37" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="blob2" cx="85%" cy="25%" r="35%">
+      <stop offset="0%" stop-color="#b8860b" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#b8860b" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="blob3" cx="60%" cy="85%" r="45%">
+      <stop offset="0%" stop-color="#f5d061" stop-opacity="0.16"/>
+      <stop offset="100%" stop-color="#f5d061" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="dots" x="0" y="0" width="24" height="24" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="1" fill="#b8860b" opacity="0.14"/>
+    </pattern>
+  </defs>
+  <rect width="100%" height="100%" fill="url(#bg)"/>
+  <rect width="100%" height="100%" fill="url(#blob1)"/>
+  <rect width="100%" height="100%" fill="url(#blob2)"/>
+  <rect width="100%" height="100%" fill="url(#blob3)"/>
+  <rect width="100%" height="100%" fill="url(#dots)"/>
+  <g opacity="0.05" fill="#b8860b">
+    <circle cx="120" cy="120" r="60"/>
+    <circle cx="1320" cy="780" r="90"/>
+    <rect x="1000" y="100" width="120" height="120" rx="24" transform="rotate(20 1060 160)"/>
+    <rect x="200" y="700" width="80" height="80" rx="16" transform="rotate(-15 240 740)"/>
+  </g>
+  <g opacity="0.04" stroke="#d4af37" stroke-width="1.5" fill="none">
+    <circle cx="720" cy="450" r="200"/>
+    <circle cx="720" cy="450" r="280"/>
+    <circle cx="720" cy="450" r="360"/>
+  </g>
+</svg>

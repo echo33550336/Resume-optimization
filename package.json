@@ -1,0 +1,22 @@
+{
+  "name": "resume-optimizer",
+  "version": "1.0.0",
+  "description": "Vibecoding 简历智能优化系统 - 基于岗位 JD 的简历深度优化",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": [
+    "resume",
+    "optimizer",
+    "vibecoding",
+    "ai"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "mammoth": "^1.13.0",
+    "pdf-parse": "^2.4.5",
+    "tesseract.js": "^7.0.0"
+  }
+}

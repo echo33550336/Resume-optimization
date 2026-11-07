@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="brand" data-font="default" data-bg="none">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>职优简历 · AI 智能优化系统</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&family=Noto+Serif+SC:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root { --radius: 12px; --radius-sm: 8px; --radius-lg: 18px; }
+
+  /* 品牌主题：蓝 + 紫，无绿色 */
+  [data-theme="brand"] {
+    --bg: #f0eadc; --bg-grad: radial-gradient(1200px 700px at 15% -5%, rgba(212,175,55,0.14) 0%, transparent 55%), radial-gradient(1000px 600px at 85% 10%, rgba(184,134,11,0.10) 0%, transparent 60%), linear-gradient(180deg, #f0eadc 0%, #e8e0cc 100%);
+    --panel: #fffdf7; --panel2: #f5efe0; --border: #e6ddc4;
+    --text: #2a2416; --muted: #6b5e3e;
+    --accent: #b8860b; --accent-soft: #f3e9c8; --accent2: #d4af37;
+    --warn: #c0392b; --ok: #b8860b; --danger: #c0392b;
+    --shadow: 0 6px 24px rgba(184,134,11,0.12); --header-bg: rgba(255,253,247,0.85);
+  }
+  /* 琥珀金 */
+  [data-theme="job51"] {
+    --bg: #f0eadc; --bg-grad: radial-gradient(1200px 700px at 15% -5%, rgba(212,175,55,0.12) 0%, transparent 55%), radial-gradient(1000px 600px at 85% 10%, rgba(200,120,30,0.10) 0%, transparent 60%), linear-gradient(180deg, #f0eadc 0%, #e8e0cc 100%);
+    --panel: #fffdf7; --panel2: #f3ecda; --border: #e2d6b0;
+    --text: #2a2416; --muted: #6b5e3e;
+    --accent: #a0780a; --accent-soft: #f1e6c0; --accent2: #d4af37;
+    --warn: #c0392b; --ok: #a0780a; --danger: #c0392b;
+    --shadow: 0 6px 24px rgba(160,120,10,0.12); --header-bg: rgba(255,253,247,0.85);
+  }
+  /* 深色 */
+  [data-theme="dark"] {
+    --bg: #1a1610; --bg-grad: radial-gradient(1200px 700px at 15% -5%, rgba(212,175,55,0.22) 0%, transparent 55%), radial-gradient(1000px 600px at 85% 10%, rgba(184,134,11,0.16) 0%, transparent 60%), linear-gradient(180deg, #1a1610 0%, #241e14 100%);
+    --panel: #241e14; --panel2: #2e261a; --border: #3d3320;
+    --text: #f3ead4; --muted: #b8a882;
+    --accent: #d4af37; --accent-soft: #3a3018; --accent2: #f5d061;
+    --warn: #e07060; --ok: #d4af37; --danger: #e07060;
+    --shadow: 0 10px 30px rgba(0,0,0,0.5); --header-bg: rgba(26,22,16,0.75);
+  }
+
+  [data-font="default"] { --font: "Noto Sans SC", "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; }
+  [data-font="yahei"] { --font: "Microsoft YaHei", "PingFang SC", "Noto Sans SC", sans-serif; }
+  [data-font="source"] { --font: "Noto Sans SC", "Source Han Sans SC", "PingFang SC", sans-serif; }
+  [data-font="serif"] { --font: "Noto Serif SC", "Songti SC", "SimSun", serif; }
+
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: var(--font); background: var(--bg-grad); background-color: var(--bg); color: var(--text); min-height: 100vh; transition: background-color .25s, color .25s; }
+  body::before {
+    content: ''; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+    background-image: var(--pattern, none);
+    background-size: var(--pattern-size, auto);
+    background-position: center;
+    background-repeat: no-repeat;
+    opacity: var(--pattern-opacity, 0.4);
+    transition: opacity .25s;
+  }
+  [data-bg="none"] { --pattern: none; }
+  [data-bg="dots"] { --pattern: radial-gradient(circle, var(--accent) 1px, transparent 1px); --pattern-size: 22px 22px; --pattern-opacity: 0.4; }
+  [data-bg="grid"] { --pattern: linear-gradient(var(--border) 1px, transparent 1px), linear-gradient(90deg, var(--border) 1px, transparent 1px); --pattern-size: 32px 32px; --pattern-opacity: 0.5; }
+  [data-bg="image"] { --pattern: url(/bg.svg); --pattern-size: cover; --pattern-opacity: 1; }
+
+  /* Header */
+  header { padding: 14px 32px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; gap: 16px; background: var(--header-bg); backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 20; }
+  .logo-img { height: 40px; width: auto; display: block; }
+  .brand { display: flex; align-items: center; gap: 10px; cursor: pointer; }
+  .logo-mark { width: 38px; height: 38px; }
+  .brand-text h1 { margin: 0; font-size: 17px; font-weight: 800; letter-spacing: 0.5px; }
+  .brand-text .sub { color: var(--muted); font-size: 11px; }
+  .header-right { display: flex; align-items: center; gap: 10px; }
+  .badge { padding: 4px 10px; border-radius: 999px; background: var(--panel2); border: 1px solid var(--border); font-size: 12px; color: var(--muted); }
+  .icon-btn { width: 36px; height: 36px; border-radius: 8px; border: 1px solid var(--border); background: var(--panel); color: var(--text); cursor: pointer; display: grid; place-items: center; font-size: 16px; transition: all .15s; }
+  .icon-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .nav-link { padding: 6px 12px; border-radius: 8px; cursor: pointer; font-size: 13px; color: var(--muted); transition: all .15s; }
+  .nav-link:hover, .nav-link.active { color: var(--accent); background: var(--accent-soft); }
+
+  /* Views */
+  .view { display: none; animation: fadeIn .35s ease; }
+  .view.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+  /* Landing */
+  .hero { max-width: 1100px; margin: 0 auto; padding: 70px 24px 40px; text-align: center; position: relative; }
+  .hero h2 { font-size: 46px; font-weight: 900; margin: 0 0 16px; line-height: 1.15; letter-spacing: -0.5px; }
+  .hero h2 .hl { background: linear-gradient(135deg, var(--accent), var(--accent2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .hero p { color: var(--muted); font-size: 17px; max-width: 640px; margin: 0 auto 32px; line-height: 1.7; }
+  .hero-cta { display: inline-flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+  .hero-cta .btn { width: auto; padding: 14px 28px; font-size: 16px; }
+
+  .features { max-width: 1100px; margin: 0 auto; padding: 20px 24px 60px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+  @media (max-width: 900px) { .features { grid-template-columns: 1fr; } .hero h2 { font-size: 32px; } }
+  .feat { background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 24px; box-shadow: var(--shadow); transition: transform .2s; backdrop-filter: blur(4px); }
+  .feat:hover { transform: translateY(-4px); }
+  .feat .icon { width: 44px; height: 44px; border-radius: 12px; background: var(--accent-soft); color: var(--accent); display: grid; place-items: center; margin-bottom: 14px; }
+  .feat .icon svg { width: 22px; height: 22px; }
+  .feat h3 { margin: 0 0 6px; font-size: 16px; font-weight: 700; }
+  .feat p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.6; }
+
+  .steps { max-width: 1100px; margin: 0 auto; padding: 0 24px 60px; }
+  .steps h3 { text-align: center; font-size: 22px; margin-bottom: 24px; }
+  .step-list { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+  @media (max-width: 900px) { .step-list { grid-template-columns: 1fr 1fr; } }
+  .step { background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; text-align: center; box-shadow: var(--shadow); }
+  .step .num { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff; display: grid; place-items: center; font-weight: 800; margin: 0 auto 10px; }
+  .step .t { font-weight: 600; font-size: 14px; margin-bottom: 4px; }
+  .step .d { color: var(--muted); font-size: 12px; }
+
+  /* Optimizer */
+  .app-wrap { max-width: 1400px; margin: 0 auto; padding: 24px; }
+  .card { background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; display: flex; flex-direction: column; gap: 14px; box-shadow: var(--shadow); }
+  .card h2 { margin: 0; font-size: 15px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+  .card h2 .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
+  label { font-size: 12px; color: var(--muted); margin-bottom: 4px; display: block; font-weight: 500; }
+  input, textarea, select { width: 100%; background: var(--panel2); border: 1px solid var(--border); color: var(--text); border-radius: var(--radius-sm); padding: 12px 14px; font-size: 14px; font-family: inherit; outline: none; transition: border-color .2s, box-shadow .2s, background .2s; box-shadow: inset 0 1px 2px rgba(0,0,0,0.04); }
+  input:focus, textarea:focus, select:focus { border-color: var(--accent); background: var(--panel); box-shadow: 0 0 0 3px var(--accent-soft), inset 0 1px 2px rgba(0,0,0,0.02); }
+  textarea { resize: vertical; min-height: 140px; line-height: 1.7; }
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .btn { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff; border: none; border-radius: var(--radius-sm); padding: 12px 18px; font-size: 15px; font-weight: 600; cursor: pointer; transition: transform .1s, opacity .2s, box-shadow .15s; width: 100%; box-shadow: 0 4px 12px rgba(0,0,0,0.12); }
+  .btn:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(0,0,0,0.16); }
+  .btn:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+  .btn-secondary { background: var(--panel2); color: var(--text); border: 1px solid var(--border); box-shadow: none; }
+  .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+
+  .optimizer-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  @media (max-width: 900px) { .optimizer-grid { grid-template-columns: 1fr; } .row { grid-template-columns: 1fr; } }
+
+  .result { background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; min-height: 200px; margin-top: 20px; box-shadow: var(--shadow); }
+  .result h2 { margin: 0 0 12px; font-size: 15px; font-weight: 700; }
+  .result-body { white-space: pre-wrap; line-height: 1.75; font-size: 14px; }
+  .result-body h1,.result-body h2,.result-body h3 { color: var(--accent); margin: 16px 0 6px; font-weight: 700; }
+  .result-body strong { color: var(--text); font-weight: 700; }
+  .result-body ul { padding-left: 22px; margin: 6px 0; }
+  .result-body li { margin: 4px 0; }
+  .result-body code { background: var(--panel2); padding: 2px 6px; border-radius: 4px; font-size: 13px; }
+  .result-body pre { background: var(--panel2); padding: 12px; border-radius: 8px; overflow-x: auto; }
+
+  .status { font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 8px; }
+  .spinner { width: 14px; height: 14px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; display: none; }
+  .spinner.on { display: inline-block; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .examples { display: flex; gap: 8px; flex-wrap: wrap; }
+  .chip { padding: 6px 12px; border-radius: 999px; background: var(--panel2); border: 1px solid var(--border); font-size: 12px; cursor: pointer; color: var(--muted); transition: all .15s; }
+  .chip:hover { color: var(--accent); border-color: var(--accent); background: var(--accent-soft); }
+
+  .upload-btn { background: transparent; border: 1px solid var(--border); color: var(--muted); border-radius: 6px; padding: 2px 8px; font-size: 11px; cursor: pointer; margin-left: 8px; vertical-align: middle; transition: all .15s; }
+  .upload-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* Settings panel */
+  .settings-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 50; display: none; align-items: center; justify-content: center; }
+  .settings-overlay.on { display: flex; }
+  .settings { background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; width: 90%; max-width: 500px; box-shadow: var(--shadow); max-height: 90vh; overflow-y: auto; }
+  .settings h3 { margin: 0 0 16px; font-size: 17px; }
+  .settings .group { margin-bottom: 18px; }
+  .settings .group label { font-size: 13px; color: var(--text); margin-bottom: 8px; font-weight: 600; }
+  .theme-options, .font-options, .bg-options { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .theme-card, .font-card, .bg-card { padding: 12px 8px; border-radius: var(--radius-sm); border: 2px solid var(--border); cursor: pointer; text-align: center; font-size: 12px; background: var(--panel2); transition: all .15s; user-select: none; }
+  .theme-card:hover, .font-card:hover, .bg-card:hover { border-color: var(--accent); }
+  .theme-card.active, .font-card.active, .bg-card.active { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+  .theme-swatch { width: 28px; height: 28px; border-radius: 50%; margin: 0 auto 6px; border: 1px solid rgba(0,0,0,0.1); }
+  .bg-preview { width: 100%; height: 24px; border-radius: 4px; margin-bottom: 6px; border: 1px solid var(--border); }
+  .settings-actions { display: flex; gap: 10px; margin-top: 8px; }
+
+  .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--panel); border: 1px solid var(--border); padding: 10px 18px; border-radius: 999px; font-size: 13px; opacity: 0; transition: all .25s; z-index: 60; box-shadow: var(--shadow); pointer-events: none; }
+  .toast.on { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+<header>
+  <div class="brand" onclick="showView('landing')">
+    <img src="/logo.svg" alt="职优简历" class="logo-img" />
+  </div>
+  <div class="header-right">
+    <span class="nav-link" data-view="landing">首页</span>
+    <span class="nav-link" data-view="optimizer">优化简历</span>
+    <div class="badge" id="health">● 检查中…</div>
+    <button class="icon-btn" id="settingsBtn" title="外观设置">⚙</button>
+  </div>
+</header>
+
+<!-- Landing -->
+<div id="view-landing" class="view active">
+  <section class="hero">
+    <h2>让简历 <span class="hl">精准匹配</span> 目标岗位</h2>
+    <p>粘贴岗位 JD 与你的简历，AI 扮演 10 年经验 HR 总监，输出匹配度诊断、优化后的简历、关键修改说明与待补充项。三分钟，让简历通过率翻倍。</p>
+    <div class="hero-cta">
+      <button class="btn" onclick="showView('optimizer')">开始优化简历</button>
+      <button class="btn btn-secondary" onclick="loadExampleAndGo()">先看示例</button>
+    </div>
+  </section>
+  <section class="features">
+    <div class="feat"><div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/></svg></div><h3>JD 精准匹配</h3><p>基于岗位要求深度分析，突出与 JD 高度相关的经历与关键词。</p></div>
+    <div class="feat"><div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></div><h3>STAR 法则重写</h3><p>每条经历用 STAR 法则重写，量化成果，告别空洞描述。</p></div>
+    <div class="feat"><div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="20" x2="4" y2="10"/><line x1="10" y1="20" x2="10" y2="4"/><line x1="16" y1="20" x2="16" y2="14"/><line x1="22" y1="20" x2="22" y2="8"/></svg></div><h3>匹配度评分</h3><p>0-100 分匹配度诊断，附带具体改进理由。</p></div>
+    <div class="feat"><div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r="2.5"/><path d="M17.5 10.5c1.5 0 3 .5 4 2"/><circle cx="6" cy="13" r="3"/><path d="M2 21c0-3 2-5 4-5s4 2 4 5"/><path d="M14 21c0-2 1.5-3.5 3.5-3.5S21 19 21 21"/></svg></div><h3>主题可切换</h3><p>金色 / 琥珀金 / 暗金，字体与背景自由选。</p></div>
+    <div class="feat"><div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div><h3>秒级生成</h3><p>大模型驱动，几秒输出完整优化简历。</p></div>
+    <div class="feat"><div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 6v6c0 5 3.5 9.5 8 10 4.5-.5 8-5 8-10V6z"/><path d="m9 12 2 2 4-4"/></svg></div><h3>隐私安全</h3><p>简历仅在本地与模型间传输，不存储。</p></div>
+  </section>
+  <section class="steps">
+    <h3>三步完成优化</h3>
+    <div class="step-list">
+      <div class="step"><div class="num">1</div><div class="t">粘贴 JD</div><div class="d">输入目标岗位与岗位要求</div></div>
+      <div class="step"><div class="num">2</div><div class="t">粘贴简历</div><div class="d">输入你的完整简历内容</div></div>
+      <div class="step"><div class="num">3</div><div class="t">一键优化</div><div class="d">AI 生成优化版简历</div></div>
+      <div class="step"><div class="num">4</div><div class="t">复制使用</div><div class="d">复制结果，投递岗位</div></div>
+    </div>
+  </section>
+</div>
+
+<!-- Optimizer -->
+<div id="view-optimizer" class="view">
+  <div class="app-wrap">
+    <div class="optimizer-grid">
+      <section class="card">
+        <h2><span class="dot"></span>目标岗位</h2>
+        <div class="row">
+          <div><label>公司名称</label><input id="company" placeholder="例如：字节跳动" /></div>
+          <div><label>岗位名称</label><input id="position" placeholder="例如：AI 产品经理" /></div>
+        </div>
+        <div><label>岗位要求（JD） <button type="button" class="upload-btn" data-target="jd">📎 上传文件</button></label><textarea id="jd" placeholder="粘贴岗位 JD 全文，或上传 PDF/Word/图片…"></textarea></div>
+        <div class="examples">
+          <span class="chip" data-example="pm">AI 产品经理 示例</span>
+          <span class="chip" data-example="data">数据分析师 示例</span>
+        </div>
+      </section>
+      <section class="card">
+        <h2><span class="dot"></span>我的简历</h2>
+        <div><label>完整简历内容 <button type="button" class="upload-btn" data-target="resume">📎 上传文件</button></label><textarea id="resume" style="min-height: 260px;" placeholder="粘贴你的完整简历内容，或上传 PDF/Word/图片…"></textarea></div>
+        <div class="row">
+          <div>
+            <label>模型</label>
+            <select id="model">
+              <option value="hunyuan-2.0-instruct-20251111">Hunyuan 2.0 Instruct（推荐）</option>
+              <option value="hunyuan-2.0-thinking-20251109">Hunyuan 2.0 Thinking</option>
+            </select>
+          </div>
+          <div><label>操作</label><button class="btn" id="optimizeBtn">开始优化简历</button></div>
+        </div>
+      </section>
+    </div>
+    <section class="result">
+      <h2>优化结果</h2>
+      <div class="meta">
+        <div class="status"><span class="spinner" id="spinner"></span><span id="statusText">等待输入…</span></div>
+        <button class="btn btn-secondary" id="copyBtn" style="width:auto;padding:6px 12px;font-size:12px;" disabled>复制结果</button>
+      </div>
+      <div id="resultBody" class="result-body" style="margin-top:12px;">尚未生成结果。</div>
+    </section>
+  </div>
+</div>
+
+<!-- Settings -->
+<div class="settings-overlay" id="settingsOverlay">
+  <div class="settings">
+    <h3>外观设置</h3>
+    <div class="group">
+      <label>主题风格</label>
+      <div class="theme-options">
+        <div class="theme-card" data-theme="brand"><div class="theme-swatch" style="background:linear-gradient(135deg,#b8860b,#d4af37)"></div>金色</div>
+        <div class="theme-card" data-theme="job51"><div class="theme-swatch" style="background:linear-gradient(135deg,#a0780a,#d4af37)"></div>琥珀金</div>
+        <div class="theme-card" data-theme="dark"><div class="theme-swatch" style="background:linear-gradient(135deg,#d4af37,#f5d061)"></div>暗金</div>
+      </div>
+    </div>
+    <div class="group">
+      <label>背景图案</label>
+      <div class="bg-options">
+        <div class="bg-card" data-bg="none"><div class="bg-preview" style="background:#f4f6fb"></div>无</div>
+        <div class="bg-card" data-bg="dots"><div class="bg-preview" style="background:radial-gradient(circle,#b8860b 1px,transparent 1px);background-size:8px 8px"></div>点阵</div>
+        <div class="bg-card" data-bg="grid"><div class="bg-preview" style="background:linear-gradient(#e2d6b0 1px,transparent 1px),linear-gradient(90deg,#e2d6b0 1px,transparent 1px);background-size:8px 8px"></div>网格</div>
+        <div class="bg-card" data-bg="image"><div class="bg-preview" style="background:url(/bg.svg);background-size:cover"></div>背景图</div>
+      </div>
+    </div>
+    <div class="group">
+      <label>字体</label>
+      <div class="font-options">
+        <div class="font-card" data-font="default">默认</div>
+        <div class="font-card" data-font="yahei">微软雅黑</div>
+        <div class="font-card" data-font="source">思源黑体</div>
+        <div class="font-card" data-font="serif">宋体/衬线</div>
+      </div>
+    </div>
+    <div class="settings-actions">
+      <button class="btn" id="saveSettings">保存</button>
+      <button class="btn btn-secondary" id="closeSettings">关闭</button>
+    </div>
+  </div>
+</div>
+
+<input type="file" id="fileInput" style="display:none" accept=".txt,.md,.csv,.pdf,.docx,.png,.jpg,.jpeg,.webp,.bmp,.tiff" />
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+
+  function showView(name) {
+    document.querySelectorAll('.view').forEach((v) => v.classList.remove('active'));
+    const v = document.getElementById('view-' + name);
+    if (v) v.classList.add('active');
+    document.querySelectorAll('.nav-link').forEach((l) => l.classList.toggle('active', l.dataset.view === name));
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+  document.querySelectorAll('.nav-link').forEach((l) => l.addEventListener('click', () => showView(l.dataset.view)));
+
+  const SETTINGS_KEY = 'resume-optimizer-settings';
+  function loadSettings() { try { return JSON.parse(localStorage.getItem(SETTINGS_KEY)) || {}; } catch (e) { return {}; } }
+  function applySettings(s) {
+    const theme = s.theme || 'brand';
+    const font = s.font || 'default';
+    const bg = s.bg || 'none';
+    document.documentElement.setAttribute('data-theme', theme);
+    document.documentElement.setAttribute('data-font', font);
+    document.documentElement.setAttribute('data-bg', bg);
+    document.querySelectorAll('.theme-card').forEach((c) => c.classList.toggle('active', c.dataset.theme === theme));
+    document.querySelectorAll('.font-card').forEach((c) => c.classList.toggle('active', c.dataset.font === font));
+    document.querySelectorAll('.bg-card').forEach((c) => c.classList.toggle('active', c.dataset.bg === bg));
+  }
+  let currentSettings = loadSettings();
+  applySettings(currentSettings);
+
+  $('settingsBtn').addEventListener('click', () => { $('settingsOverlay').classList.add('on'); applySettings(currentSettings); });
+  $('closeSettings').addEventListener('click', () => $('settingsOverlay').classList.remove('on'));
+  $('settingsOverlay').addEventListener('click', (e) => { if (e.target === $('settingsOverlay')) $('settingsOverlay').classList.remove('on'); });
+  document.querySelectorAll('.theme-card').forEach((c) => c.addEventListener('click', () => { currentSettings.theme = c.dataset.theme; applySettings(currentSettings); }));
+  document.querySelectorAll('.font-card').forEach((c) => c.addEventListener('click', () => { currentSettings.font = c.dataset.font; applySettings(currentSettings); }));
+  document.querySelectorAll('.bg-card').forEach((c) => c.addEventListener('click', () => { currentSettings.bg = c.dataset.bg; applySettings(currentSettings); }));
+  $('saveSettings').addEventListener('click', () => { localStorage.setItem(SETTINGS_KEY, JSON.stringify(currentSettings)); $('settingsOverlay').classList.remove('on'); showToast('设置已保存'); });
+
+  function showToast(msg) {
+    const t = $('toast'); t.textContent = msg; t.classList.add('on');
+    clearTimeout(window.__toastTimer); window.__toastTimer = setTimeout(() => t.classList.remove('on'), 1800);
+  }
+
+  const EXAMPLES = {
+    pm: {
+      company: '字节跳动', position: 'AI 产品经理',
+      jd: `岗位职责：\n1. 负责 AI 产品（大模型应用）的产品规划与落地，从 0 到 1 推动产品上线；\n2. 深入理解用户需求，设计产品功能与交互流程，输出 PRD；\n3. 跨团队协作（算法、工程、设计），推进项目按时交付；\n4. 跟踪产品数据，持续迭代优化，提升用户体验与商业价值；\n5. 关注行业动态与竞品，提出产品创新方向。\n\n任职要求：\n1. 本科及以上学历，计算机/产品相关专业优先；\n2. 3 年以上产品经验，有 AI/大模型产品经验优先；\n3. 熟悉 RAG、Agent、Prompt Engineering 等技术概念；\n4. 数据驱动，具备 SQL/数据分析能力；\n5. 优秀的沟通协作与项目管理能力。`,
+      resume: `张三 | 男 | 1998 | 本科 | 3 年经验\n求职意向：产品经理\n电话：138xxxx | 邮箱：xxx@xx.com\n\n教育背景\nXX 大学 计算机科学与技术 本科 2016-2020\n\n工作经历\nABC 科技 产品经理 2020.07-2023.06\n- 负责公司 SaaS 产品的需求收集与 PRD 编写\n- 与开发团队协作推进功能上线\n- 做过用户调研和数据分析\n\n项目经历\n智能客服系统\n- 参与 AI 客服产品设计\n- 使用大模型做问答\n\n技能\nPython, SQL, Axure, Figma`
+    },
+    data: {
+      company: '腾讯', position: '数据分析师',
+      jd: `岗位职责：\n1. 负责业务数据分析，输出分析报告与洞察；\n2. 建立数据指标体系与监控看板；\n3. 支持产品/运营决策，设计 A/B 实验；\n4. 参与数据平台与数据治理工作。\n\n任职要求：\n1. 统计/数学/计算机相关专业；\n2. 熟练 SQL、Python，熟悉数据可视化；\n3. 有 A/B 实验设计经验；\n4. 良好的业务理解与沟通能力。`,
+      resume: `李四 | 女 | 25 岁\n求职意向：数据分析师\n\n教育：XX 大学 统计学 硕士 2021-2024\n\n实习：某互联网公司 数据分析实习生 2023.06-2023.12\n- 做数据报表\n- 用 SQL 查询数据\n- 参与用户行为分析\n\n技能：SQL, Python, Tableau`
+    }
+  };
+
+  // ===== File upload =====
+  let uploadTarget = null;
+  document.querySelectorAll('.upload-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      uploadTarget = btn.dataset.target;
+      $('fileInput').value = '';
+      $('fileInput').click();
+    });
+  });
+  $('fileInput').addEventListener('change', async (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file || !uploadTarget) return;
+    showToast('正在提取文本…');
+    try {
+      const reader = new FileReader();
+      reader.onload = async () => {
+        const base64 = reader.result.split(',')[1];
+        const r = await fetch('/api/extract', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ filename: file.name, data: base64 }),
+        });
+        const j = await r.json();
+        if (!r.ok) throw new Error(j.error || r.statusText);
+        const ta = $(uploadTarget);
+        ta.value = (ta.value ? ta.value + '\n\n' : '') + j.text;
+        showToast('文本提取完成');
+      };
+      reader.readAsDataURL(file);
+    } catch (err) {
+      showToast('提取失败：' + err.message);
+    }
+  });
+
+  document.querySelectorAll('.chip').forEach((c) => {
+    c.addEventListener('click', () => {
+      const ex = EXAMPLES[c.dataset.example];
+      if (!ex) return;
+      $('company').value = ex.company;
+      $('position').value = ex.position;
+      $('jd').value = ex.jd;
+      $('resume').value = ex.resume;
+    });
+  });
+
+  function loadExampleAndGo() {
+    const ex = EXAMPLES.pm;
+    $('company').value = ex.company;
+    $('position').value = ex.position;
+    $('jd').value = ex.jd;
+    $('resume').value = ex.resume;
+    showView('optimizer');
+  }
+
+  async function checkHealth() {
+    try {
+      const r = await fetch('/api/health');
+      const j = await r.json();
+      $('health').textContent = j.hasKey ? `● ${j.model} 已就绪` : '● 未配置 API Key';
+      $('health').style.color = j.hasKey ? 'var(--ok)' : 'var(--warn)';
+    } catch (e) {
+      $('health').textContent = '● 服务未启动';
+      $('health').style.color = 'var(--danger)';
+    }
+  }
+  checkHealth();
+
+  function mdToHtml(md) {
+    let html = md.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    html = html.replace(/```([\s\S]*?)```/g, (_, code) => `<pre><code>${code}</code></pre>`);
+    html = html.replace(/^### (.*)$/gm, '<h3>$1</h3>');
+    html = html.replace(/^## (.*)$/gm, '<h2>$1</h2>');
+    html = html.replace(/^# (.*)$/gm, '<h1>$1</h1>');
+    html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+    html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
+    const lines = html.split('\n');
+    const out = [];
+    let inList = false;
+    for (const line of lines) {
+      if (/^- /.test(line)) {
+        if (!inList) { out.push('<ul>'); inList = true; }
+        out.push(`<li>${line.slice(2)}</li>`);
+      } else {
+        if (inList) { out.push('</ul>'); inList = false; }
+        out.push(line);
+      }
+    }
+    if (inList) out.push('</ul>');
+    html = out.join('\n');
+    html = html.replace(/\n{2,}/g, '</p><p>');
+    html = `<p>${html}</p>`;
+    html = html.replace(/<p><\/p>/g, '');
+    html = html.replace(/<p>(<h[123]>)/g, '$1');
+    html = html.replace(/(<\/h[123]>)<\/p>/g, '$1');
+    html = html.replace(/<p>(<ul>)/g, '$1');
+    html = html.replace(/(<\/ul>)<\/p>/g, '$1');
+    html = html.replace(/<p>(<pre>)/g, '$1');
+    html = html.replace(/(<\/pre>)<\/p>/g, '$1');
+    return html;
+  }
+
+  $('optimizeBtn').addEventListener('click', async () => {
+    const jd = $('jd').value.trim();
+    const resume = $('resume').value.trim();
+    if (!jd || !resume) { $('statusText').textContent = '请填写 JD 和简历'; return; }
+    $('optimizeBtn').disabled = true;
+    $('spinner').classList.add('on');
+    $('statusText').textContent = 'AI 正在优化中，请稍候…';
+    $('resultBody').textContent = '';
+    try {
+      const r = await fetch('/api/optimize', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ company: $('company').value.trim(), position: $('position').value.trim(), jd, resume, model: $('model').value }),
+      });
+      const j = await r.json();
+      if (!r.ok) throw new Error(j.error || r.statusText);
+      $('resultBody').innerHTML = mdToHtml(j.content);
+      $('statusText').textContent = `完成 · ${j.model} · ${j.usage?.total_tokens || ''} tokens`;
+      $('copyBtn').disabled = false;
+      window.__lastResult = j.content;
+      showToast('优化完成');
+    } catch (e) {
+      $('resultBody').textContent = '出错：' + e.message;
+      $('statusText').textContent = '失败';
+    } finally {
+      $('optimizeBtn').disabled = false;
+      $('spinner').classList.remove('on');
+    }
+  });
+
+  $('copyBtn').addEventListener('click', async () => {
+    try { await navigator.clipboard.writeText(window.__lastResult || ''); showToast('已复制到剪贴板'); }
+    catch (e) { showToast('复制失败'); }
+  });
+</script>
+</body>
+</html>
