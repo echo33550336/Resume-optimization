@@ -2,6 +2,14 @@
 name: resume-optimizer
 description: Optimize a resume against a target job description (JD). Use when the user asks to optimize/rewrite/improve a resume, tailor a resume to a job posting, diagnose resume-JD match, or generate an optimized resume with STAR-format bullets and match score.
 argument-hint: "<company> <position> --jd <jd text or file> --resume <resume text or file>"
+license: MIT
+metadata:
+  author: echo33550336
+  version: "1.0.0"
+  category: productivity
+external_urls:
+  - "User-configured OpenAI-compatible LLM endpoint (e.g. https://api.openai.com, https://tokenhub.tencentmaas.com)"
+compatibility: "Requires an OpenAI-compatible LLM endpoint and API key provided by the user."
 ---
 
 # Resume Optimizer
