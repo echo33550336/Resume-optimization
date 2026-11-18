@@ -1,175 +1,273 @@
-# Resume Optimizer · Vibecoding
+# Resume Optimizer
 
-> An AI-powered resume optimization system that tailors your resume to a target job
-> description (JD). Built as a Vibecoding project.
+> Tailor a resume to a specific job description with an LLM that behaves like a hiring manager — streamed live, fully local, zero frameworks.
 
-[![Node](https://img.shields.io/badge/Node.js-20%2B-339933?logo=node.js&logoColor=white)](https://nodejs.org)
-[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Node](https://img.shields.io/badge/node-%3E%3D18-brightgreen)](https://nodejs.org)
+[![License](https://img.shields.io/badge/license-MIT-blue)](./LICENSE)
+[![Backend](https://img.shields.io/badge/backend-zero--framework-black)](server.js)
+[![Streaming](https://img.shields.io/badge/output-SSE-purple)](#streaming-sse)
 
-## Overview
+---
 
-**Resume Optimizer** is a full-stack web application that takes a target job posting and
-your raw resume, then uses a large language model (acting as a 10-year-experience HR
-director) to produce:
+## Introduction
 
-1. A **match score** (0–100) between your resume and the JD, with concrete reasons.
-2. A **fully rewritten resume** in standard structure, with every experience rewritten
-   using the STAR method and quantified results, highlighting JD-matched keywords.
-3. **Key change notes** — the top 5–8 edits and why each was made.
-4. **Risk tips / gaps** — missing information and things to confirm.
+**Resume Optimizer** turns one job description plus one resume into a match-oriented rewrite.
+You paste (or upload) the JD and your resume, pick the job family, and an LLM acting as a
+senior HR director returns a four-part report:
 
-The goal is not just to rephrase wording, but to systematically align your resume with
-the target role so it passes both ATS filters and human reviewers.
+1. **Match diagnosis** — a 0–100 score with the reasons behind it.
+2. **Rewritten resume** — the full resume rebuilt in STAR form, quantified, keyword-aligned with the JD, and honest (missing figures become `[add the number]` placeholders instead of invented ones).
+3. **Change log** — the most important 5–8 edits and why each one matters.
+4. **Gaps and risks** — information the recruiter will ask for that the resume does not answer yet.
+
+The point is not "rewrite my bullets" — it is *diagnosis first, rewrite second*: the model must
+justify the score, then show exactly which text moved the score, then flag what is still missing.
+Text streams into the page as it is produced, so a 3,000-token rewrite becomes readable in seconds
+instead of a spinner and a wait.
+
+It is a single small Node.js service with a static single-page UI: no build step, no database, no
+telemetry, no third-party proxy. The browser never sees the API key; the server is the only
+component that talks to the LLM you configure.
 
 ## Features
 
-- **JD-driven optimization** — paste the full job description and your resume; the AI
-  diagnoses the match and rewrites accordingly.
-- **Multi-format input** — paste text or upload files: TXT, Markdown, CSV, PDF, DOCX, and
-  images (PNG/JPG/WEBP/BMP/TIFF). Text is extracted automatically (OCR for images).
-- **Match score & diagnosis** — quantitative 0–100 score with 3–5 supporting reasons.
-- **STAR-format rewrites** — every bullet rewritten with Situation-Task-Action-Result and
-  quantified outcomes; missing data is marked with `[请补充具体数字]` placeholders.
-- **Multi-theme UI** — Gold / Amber Gold / Dark Gold themes, with selectable fonts and
-  background patterns (none, dots, grid, image).
-- **Personal brand logo** — custom SVG logo ("职优简历").
-- **Privacy-first** — resumes are transmitted only between your browser and the LLM;
-  nothing is stored server-side.
-- **Zero-framework frontend** — vanilla HTML/CSS/JS, no build step.
-- **Agent Skill included** — ships a `resume-optimizer` skill (`.commandcode/skills/`) so
-  any Agent-Skills-compatible agent can run the workflow.
+- **JD-aware rewriting** — every bullet is rewritten against the target role, STAR-style, with quantified results.
+- **Streaming output (SSE)** — the result renders token by token; stop at any moment and keep what was generated.
+- **Cancel and export** — stop generation, copy plain text, copy Markdown, download `.md`, or print / save as PDF.
+- **Multi-format input** — paste text or drop PDF / DOCX / TXT / MD / CSV / images (OCR) onto the JD or resume box.
+- **Job-family focus** — tech, product, data, ops, design, marketing, general: each carries its own optimization bias.
+- **Theme system** — brand gold / amber / dark, four fonts, four background patterns, persisted in `localStorage`.
+- **Local-first and private** — nothing leaves your machine except the request to the LLM endpoint you configured.
+- **Hardened server** — LLM timeout with bounded retries, typed error codes, body/upload/text limits, localhost-only CORS, static path containment, security headers, graceful shutdown.
 
-## Tech Stack
-
-| Layer | Technology |
-|-------|------------|
-| Runtime | Node.js 20+ |
-| Backend | Native `http` module (zero framework), REST endpoints |
-| Frontend | Vanilla HTML / CSS / JavaScript (no build step) |
-| LLM | OpenAI-compatible chat/completions (default: Tencent Hunyuan 2.0 Instruct) |
-| PDF parsing | `pdf-parse` |
-| DOCX parsing | `mammoth` |
-| Image OCR | `tesseract.js` (chi_sim + eng) |
-| Markdown rendering | Custom client-side renderer |
-| Theming | CSS custom properties + `localStorage` |
-| Config | `.env` (dotenv-style, parsed manually) |
-
-## Project Structure
+## How it works
 
 ```
-resume-optimization/
-├── server.js                 # Node.js backend (static + /api/optimize + /api/extract)
-├── package.json
-├── .env                      # LLM config (gitignored)
-├── .env.example              # Config template
-├── .gitignore
-├── README.md
+┌──────────────┐   paste / drop JD + resume    ┌──────────────────┐
+│ Browser UI   │ ────────────────────────────► │ Node http server │
+│ index.html   │                               │   server.js      │
+└──────────────┘ ◄──── SSE: delta, delta, … ── └────────┬─────────┘
+                                                        │ buildMessages()
+                                                        ▼
+                                               ┌──────────────────┐
+                                               │   prompt.js      │
+                                               │ system + user    │
+                                               └────────┬─────────┘
+                                                        │ POST /chat/completions
+                                                        ▼
+                                               ┌──────────────────┐
+                                               │ OpenAI-compatible│
+                                               │ LLM endpoint     │
+                                               └──────────────────┘
+```
+
+1. The UI posts `{ company, position, jd, resume, roleType }`.
+2. `prompt.js` assembles the system prompt (HR-director persona plus family-specific focus) and the user prompt.
+3. `server.js` calls any OpenAI-compatible `/chat/completions` endpoint, retrying only before the first delta reaches the browser.
+4. Tokens are relayed as SSE frames; the UI renders Markdown incrementally and keeps the raw text for export.
+
+## Tech stack
+
+| Layer | Choice |
+| --- | --- |
+| Server | Node.js native `http` — no framework, no router dependency |
+| Frontend | Hand-written HTML / CSS / JS — no bundler, no build step |
+| LLM | Any OpenAI-compatible `/chat/completions` endpoint (Tencent Hunyuan by default) |
+| Extractors | `pdf-parse`, `mammoth`, `tesseract.js` — optional and lazily required |
+| Prompts | `prompt.js` — single source of truth, shared with the Agent Skill |
+
+## Project structure
+
+```
+resume-optimizer/
+├── server.js                  # HTTP server: routes, SSE streaming, static files, limits
+├── prompt.js                  # system / user prompt builders (single source of truth)
 ├── public/
-│   ├── index.html            # Single-page app (landing + optimizer + settings)
-│   ├── logo.svg              # Brand logo
-│   └── bg.svg                # Background image
-└── .commandcode/
-    └── skills/
-        └── resume-optimizer/
-            └── SKILL.md      # Agent skill definition
+│   ├── index.html             # single-page UI: landing, optimizer, settings, export toolbar
+│   ├── logo.svg
+│   └── bg.svg
+├── .commandcode/
+│   ├── skills/resume-optimizer/SKILL.md   # Agent Skill definition
+│   └── taste/taste.md
+├── .env.example
+├── LICENSE
+└── README.md
 ```
 
-## Getting Started
+## Quick start
 
-### Prerequisites
-
-- Node.js 20 or newer
-- An OpenAI-compatible LLM endpoint and API key
-
-### Installation
+Prerequisites: **Node.js 18+** (needs the global `fetch`).
 
 ```bash
 git clone https://github.com/echo33550336/Resume-optimization.git
 cd Resume-optimization
-npm install
+
+npm install              # optional — only needed for PDF / DOCX / image extraction
+cp .env.example .env     # then set LLM_API_KEY (and LLM_API_BASE if not Tencent Hunyuan)
+
+npm start                # http://127.0.0.1:3000
+npm run check            # syntax check for server.js and prompt.js
 ```
 
-### Configuration
+Without `npm install` the app still runs: text pasting works, uploads answer with a clear
+"extractor not installed" message, and `GET /api/health` reports which extractors are available.
 
-Copy the example env file and fill in your credentials:
+### Minimal `.env`
 
-```bash
-cp .env.example .env
+```dotenv
+LLM_API_KEY=sk-your-key
+LLM_API_BASE=https://api.openai.com/v1
+LLM_MODEL=gpt-4o-mini
 ```
 
-```env
-LLM_API_KEY=your_api_key_here
-LLM_API_BASE=https://tokenhub.tencentmaas.com/v1
-LLM_MODEL=hunyuan-2.0-instruct-20251111
-LLM_MAX_TOKENS=4096
-PORT=3000
-```
+## Configuration
 
-Any OpenAI-compatible endpoint works (Hunyuan, DeepSeek, OpenAI, etc.) — just adjust
-`LLM_API_BASE`, `LLM_API_KEY`, and `LLM_MODEL`.
+Every setting can come from `.env` or from real environment variables (real environment wins):
 
-### Run
-
-```bash
-npm start
-```
-
-Then open http://localhost:3000 in your browser.
+| Variable | Default | Meaning |
+| --- | --- | --- |
+| `LLM_API_KEY` | — | Bearer token for the endpoint (**required**) |
+| `LLM_API_BASE` | `https://tokenhub.tencentmaas.com/v1` | OpenAI-compatible base URL |
+| `LLM_MODEL` | `hunyuan-2.0-instruct-20251111` | Default model |
+| `LLM_MAX_TOKENS` | `4096` | Max output tokens |
+| `LLM_TIMEOUT_MS` | `120000` | Per-attempt timeout (minimum 5000) |
+| `LLM_RETRIES` | `2` | Retries on 429 / 5xx / network failure, before any token is streamed |
+| `PORT` | `3000` | Listen port |
+| `HOST` | `127.0.0.1` | Listen host — keep loopback unless you know why |
+| `MAX_BODY_BYTES` | `20971520` (20 MB) | Max JSON request body |
+| `MAX_EXTRACT_BYTES` | `20971520` (20 MB) | Max uploaded file size |
+| `MAX_TEXT_CHARS` | `60000` | Max characters for JD / resume / extracted text |
+| `ALLOWED_ORIGINS` | — | Extra CORS origins, comma separated (localhost is always allowed) |
 
 ## Usage
 
-1. **Landing page** — overview of capabilities, tech stack, and highlights.
-2. **Optimizer page** — fill in company, position, JD, and resume (paste text or upload
-   a file via the 📎 button).
-3. Click **开始优化简历** — the AI returns a structured optimization.
-4. **Copy** the result or iterate on a section.
-5. Open **⚙ settings** to switch theme (Gold / Amber Gold / Dark Gold), font, and
-   background pattern.
+1. Open `http://127.0.0.1:3000` and click **Optimize resume**.
+2. Fill in company and position, paste the JD and your resume — or drag a file onto either box.
+3. Pick a job family (it changes what the model emphasises) and a model.
+4. Press **Optimize**. The report streams in; **Stop** cancels, the toolbar offers copy as text, copy as Markdown, download `.md`, and print.
+5. Prefer a different light? **Settings** switches theme, font, and background; choices persist locally.
 
-### Supported file types for upload
-
-| Type | Extension | Extractor |
-|------|-----------|-----------|
-| Plain text | `.txt`, `.md`, `.csv` | Direct UTF-8 read |
-| PDF | `.pdf` | `pdf-parse` |
-| Word | `.docx` | `mammoth` |
-| Image | `.png`, `.jpg`, `.jpeg`, `.webp`, `.bmp`, `.tiff` | `tesseract.js` OCR (chi_sim + eng) |
+Keyboard: `Ctrl/Cmd + Enter` submits, `Esc` closes the settings dialog.
 
 ## API
+
+All JSON endpoints answer `{ "ok": true, ... }` on success and `{ "ok": false, "code": "...", "error": "..." }` on failure.
+
+### `GET /api/health`
+
+```json
+{
+  "ok": true,
+  "model": "hunyuan-2.0-instruct-20251111",
+  "hasKey": true,
+  "streaming": true,
+  "roleTypes": ["general", "tech", "product", "data", "ops", "design", "marketing"],
+  "extractors": { "pdf": true, "docx": true, "ocr": true },
+  "limits": { "maxBodyBytes": 20971520, "maxExtractBytes": 20971520, "maxTextChars": 60000, "llmTimeoutMs": 120000 }
+}
+```
+
+### `POST /api/extract`
+
+```json
+{ "filename": "resume.pdf", "data": "<base64 or data URL>" }
+```
+
+Response: `{ "ok": true, "text": "...", "meta": { "filename": "resume.pdf", "ext": "pdf", "bytes": 81234, "chars": 4210, "elapsedMs": 640 } }`
 
 ### `POST /api/optimize`
 
 ```json
 {
-  "company": "字节跳动",
-  "position": "AI 产品经理",
-  "jd": "...",
-  "resume": "...",
-  "model": "hunyuan-2.0-instruct-20251111"
+  "company": "Acme Corp",
+  "position": "Senior Backend Engineer",
+  "jd": "We are looking for ...",
+  "resume": "Experience: ...",
+  "roleType": "tech",
+  "model": "hunyuan-2.0-instruct-20251111",
+  "stream": true
 }
 ```
 
-Returns `{ "content": "...", "model": "...", "usage": {...} }`.
+- `stream: false` (default) — returns `{ "ok": true, "content": "...", "model": "...", "usage": { ... }, "elapsedMs": 8421 }`.
+- `stream: true` or `Accept: text/event-stream` — returns `text/event-stream`:
 
-### `POST /api/extract`
+```
+event: meta
+data: {"model":"hunyuan-2.0-instruct-20251111","roleType":"tech","startedAt":"2026-01-01T00:00:00.000Z"}
 
-```json
-{ "filename": "resume.pdf", "data": "<base64>" }
+event: delta
+data: {"content":"## 1. Match diagnosis\n"}
+
+event: delta
+data: {"content":"- Score: 78/100 ..."}
+
+event: done
+data: {"model":"hunyuan-2.0-instruct-20251111","usage":{"total_tokens":3120},"chars":4210,"elapsedMs":8421}
 ```
 
-Returns `{ "text": "..." }`.
+A comment frame `: ping` is sent every 15 seconds to keep idle connections alive. Failures after the
+stream has started arrive as `event: error` frames; failures before it arrive as plain JSON.
 
-### `GET /api/health`
+### Error codes
 
-Returns `{ "ok": true, "model": "...", "hasKey": true, "extractors": {...} }`.
+| HTTP | `code` | When |
+| --- | --- | --- |
+| 400 | `INVALID_JSON` | Body is not valid JSON |
+| 400 | `INVALID_REQUEST` | Missing / empty required field |
+| 400 | `TEXT_TOO_LONG` | Text exceeds `MAX_TEXT_CHARS` |
+| 400 | `INVALID_BASE64` | Upload payload is not valid base64 |
+| 404 | `NOT_FOUND` | Unknown API route |
+| 405 | `METHOD_NOT_ALLOWED` | Wrong HTTP verb for the route |
+| 413 | `BODY_TOO_LARGE` | Request body over `MAX_BODY_BYTES` |
+| 413 | `FILE_TOO_LARGE` | Upload over `MAX_EXTRACT_BYTES` |
+| 415 | `UNSUPPORTED_TYPE` | File extension not supported |
+| 422 | `EXTRACT_EMPTY` | Extraction produced no text |
+| 429 | `UPSTREAM_RATE_LIMITED` | LLM endpoint rate-limited the request |
+| 502 | `UPSTREAM_NETWORK` / `UPSTREAM_ERROR` / `UPSTREAM_EMPTY` / `UPSTREAM_INVALID` / `UPSTREAM_STREAM_ERROR` | Upstream transport, status, empty or malformed answer |
+| 503 | `NO_API_KEY` | Server has no `LLM_API_KEY` |
+| 503 | `EXTRACTOR_UNAVAILABLE` | PDF / DOCX / OCR dependency not installed |
+| 504 | `UPSTREAM_TIMEOUT` | No answer within `LLM_TIMEOUT_MS` |
+| 499 | `CLIENT_CLOSED` | Browser disconnected (server-side only, not sent to the client) |
+
+## Security model
+
+- **CORS**: only same-origin, `localhost`, `127.0.0.1`, `[::1]`, and `ALLOWED_ORIGINS` are allowed — a random page cannot drive your local server with your API key.
+- **Static files**: served only from `public/`, with a `path.relative` containment check and dot-file blocking.
+- **Key handling**: the API key stays on the server; logs run through `sanitize()` before printing, so tokens are masked as `***`.
+- **Limits**: request bodies, uploads, and prompt text are all bounded; 413 responses close the connection so oversized clients fail fast.
+- **Exposure**: bind to `127.0.0.1` (the default). If you deploy it behind a reverse proxy, add authentication yourself — this project has none.
+
+## Deployment notes
+
+- The service is stateless; one process per port is enough.
+- For a container or an internal server, set `HOST=0.0.0.0`, keep `ALLOWED_ORIGINS` tight, and terminate TLS at a proxy.
+- Optional extractors pull native/heavy dependencies (`tesseract.js` downloads language data on first OCR). Install them only if you need file uploads.
 
 ## Agent Skill
 
-The workflow is also packaged as an Agent Skill at
-`.commandcode/skills/resume-optimizer/SKILL.md`. Any agent implementing the Agent Skills
-standard can load it via `/resume-optimizer`. It contains the full system prompt, user
-prompt template, extraction rules, and output contract.
+`.commandcode/skills/resume-optimizer/SKILL.md` lets an Agent CLI run the same workflow without the
+web UI: it documents the input contract, the system prompt, and the expected output shape. The
+canonical prompt lives in `prompt.js`; when you change one, update the other so they do not drift.
+
+## Development
+
+```bash
+npm run check    # node --check server.js && node --check prompt.js
+npm start        # run locally
+```
+
+The frontend has no build step: edit `public/index.html`, refresh the page. The server sends
+`Cache-Control: no-store` for HTML, so changes appear immediately.
+
+## Roadmap
+
+- [ ] Session history with saved comparisons
+- [ ] Multi-turn refinement of a single section
+- [ ] DOCX export with real formatting
+- [ ] Streaming token / latency metrics in the UI
+- [ ] Pluggable prompt profiles for different industries
 
 ## License
 
-MIT
+[MIT](./LICENSE) © echo33550336

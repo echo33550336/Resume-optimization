@@ -178,6 +178,43 @@
 
   .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--panel); border: 1px solid var(--border); padding: 10px 18px; border-radius: 999px; font-size: 13px; opacity: 0; transition: all .25s; z-index: 60; box-shadow: var(--shadow); pointer-events: none; }
   .toast.on { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* ===== v2 additions: toolbar / streaming / a11y / print ===== */
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 6px; }
+  .nav-link[role="button"] { cursor: pointer; }
+  .meta { flex-wrap: wrap; }
+  .result-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .result-actions .btn { width: auto; padding: 6px 12px; font-size: 12px; }
+  .result-actions .btn:disabled { opacity: .45; cursor: not-allowed; }
+  .result-body.streaming::after { content: '▍'; color: var(--accent); animation: blink 1s steps(2, start) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+  .result-body h2 { margin-top: 1.1em; }
+  .result-body h3 { margin-top: .9em; }
+  .result-body table { width: 100%; border-collapse: collapse; margin: 10px 0; }
+  .result-body td, .result-body th { border: 1px solid var(--border); padding: 6px 8px; text-align: left; }
+  textarea.dragover { border-color: var(--accent) !important; box-shadow: 0 0 0 3px var(--accent-soft); }
+  .drop-hint { font-size: 12px; color: var(--muted); margin-top: 6px; }
+  .error-box { border: 1px solid var(--danger); color: var(--danger); padding: 10px 12px; border-radius: var(--radius-sm); }
+  .result-body code { word-break: break-word; }
+  @media (max-width: 720px) {
+    header { padding: 10px 16px; }
+    .hero h2 { font-size: 30px; }
+    .result-actions .btn { padding: 5px 10px; }
+  }
+  @media print {
+    header, .hero, .features, .tech-section, .highlights, .steps,
+    #settingsOverlay, #toast, .optimizer-grid, .result-actions, .status,
+    .section-title, .nav-link, #health { display: none !important; }
+    body { background: #fff !important; color: #000 !important; }
+    body::before { display: none !important; }
+    .view { display: none !important; }
+    #view-optimizer { display: block !important; }
+    .app-wrap { max-width: none; padding: 0; margin: 0; }
+    .result { border: none !important; box-shadow: none !important; background: #fff !important; padding: 0 !important; }
+    .result-body { white-space: normal; color: #000; font-size: 12.5pt; }
+    .result-body h1, .result-body h2, .result-body h3 { color: #000 !important; break-after: avoid; }
+    .result-body pre, .result-body code { background: #f4f4f4 !important; color: #000 !important; }
+  }
 </style>
 </head>
 <body>
@@ -186,10 +223,10 @@
     <img src="/logo.svg" alt="职优简历" class="logo-img" />
   </div>
   <div class="header-right">
-    <span class="nav-link" data-view="landing">首页</span>
-    <span class="nav-link" data-view="optimizer">优化简历</span>
-    <div class="badge" id="health">● 检查中…</div>
-    <button class="icon-btn" id="settingsBtn" title="外观设置">⚙</button>
+    <span class="nav-link" data-view="landing" role="button" tabindex="0">首页</span>
+    <span class="nav-link" data-view="optimizer" role="button" tabindex="0">优化简历</span>
+    <div class="badge" id="health" role="status" aria-live="polite">● 检查中…</div>
+    <button class="icon-btn" id="settingsBtn" title="外观设置" aria-label="外观设置" aria-haspopup="dialog">⚙</button>
   </div>
 </header>
 
@@ -257,15 +294,17 @@
           <div><label>公司名称</label><input id="company" placeholder="例如：字节跳动" /></div>
           <div><label>岗位名称</label><input id="position" placeholder="例如：AI 产品经理" /></div>
         </div>
-        <div><label>岗位要求（JD） <button type="button" class="upload-btn" data-target="jd">📎 上传文件</button></label><textarea id="jd" placeholder="粘贴岗位 JD 全文，或上传 PDF/Word/图片…"></textarea></div>
+        <div><label>岗位要求（JD） <button type="button" class="upload-btn" data-target="jd">📎 上传文件</button></label><textarea id="jd" placeholder="粘贴岗位 JD 全文，或上传 PDF/Word/图片…"></textarea><div class="drop-hint">支持拖拽 PDF / Word / 图片 / TXT 到输入框</div></div>
         <div class="examples">
-          <span class="chip" data-example="pm">AI 产品经理 示例</span>
-          <span class="chip" data-example="data">数据分析师 示例</span>
+          <span class="chip" data-example="pm" role="button" tabindex="0">AI 产品经理 示例</span>
+          <span class="chip" data-example="data" role="button" tabindex="0">数据分析师 示例</span>
+          <span class="chip" data-example="tech" role="button" tabindex="0">后端开发 示例</span>
+          <span class="chip" data-example="ops" role="button" tabindex="0">用户运营 示例</span>
         </div>
       </section>
       <section class="card">
         <h2><span class="dot"></span>我的简历</h2>
-        <div><label>完整简历内容 <button type="button" class="upload-btn" data-target="resume">📎 上传文件</button></label><textarea id="resume" style="min-height: 260px;" placeholder="粘贴你的完整简历内容，或上传 PDF/Word/图片…"></textarea></div>
+        <div><label>完整简历内容 <button type="button" class="upload-btn" data-target="resume">📎 上传文件</button></label><textarea id="resume" style="min-height: 260px;" placeholder="粘贴你的完整简历内容，或上传 PDF/Word/图片…"></textarea><div class="drop-hint">支持拖拽文件到输入框，也可直接粘贴</div></div>
         <div class="row">
           <div>
             <label>岗位类型</label>
@@ -293,16 +332,22 @@
     <section class="result">
       <h2>优化结果</h2>
       <div class="meta">
-        <div class="status"><span class="spinner" id="spinner"></span><span id="statusText">等待输入…</span></div>
-        <button class="btn btn-secondary" id="copyBtn" style="width:auto;padding:6px 12px;font-size:12px;" disabled>复制结果</button>
+        <div class="status"><span class="spinner" id="spinner"></span><span id="statusText" aria-live="polite">等待输入…</span></div>
+        <div class="result-actions">
+          <button class="btn btn-secondary" id="stopBtn" disabled>停止</button>
+          <button class="btn btn-secondary" id="copyBtn" disabled>复制文本</button>
+          <button class="btn btn-secondary" id="copyMdBtn" disabled>复制 Markdown</button>
+          <button class="btn btn-secondary" id="downloadBtn" disabled>下载 .md</button>
+          <button class="btn btn-secondary" id="printBtn" disabled>打印 / PDF</button>
+        </div>
       </div>
-      <div id="resultBody" class="result-body" style="margin-top:12px;">尚未生成结果。</div>
+      <div id="resultBody" class="result-body" style="margin-top:12px;" aria-live="polite">尚未生成结果。</div>
     </section>
   </div>
 </div>
 
 <!-- Settings -->
-<div class="settings-overlay" id="settingsOverlay">
+<div class="settings-overlay" id="settingsOverlay" role="dialog" aria-modal="true" aria-label="外观设置" aria-hidden="true">
   <div class="settings">
     <h3>外观设置</h3>
     <div class="group">
@@ -351,7 +396,12 @@
     document.querySelectorAll('.nav-link').forEach((l) => l.classList.toggle('active', l.dataset.view === name));
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
-  document.querySelectorAll('.nav-link').forEach((l) => l.addEventListener('click', () => showView(l.dataset.view)));
+  document.querySelectorAll('.nav-link').forEach((l) => {
+    l.addEventListener('click', () => showView(l.dataset.view));
+    l.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); showView(l.dataset.view); }
+    });
+  });
 
   const SETTINGS_KEY = 'resume-optimizer-settings';
   function loadSettings() { try { return JSON.parse(localStorage.getItem(SETTINGS_KEY)) || {}; } catch (e) { return {}; } }
@@ -369,9 +419,9 @@
   let currentSettings = loadSettings();
   applySettings(currentSettings);
 
-  $('settingsBtn').addEventListener('click', () => { $('settingsOverlay').classList.add('on'); applySettings(currentSettings); });
-  $('closeSettings').addEventListener('click', () => $('settingsOverlay').classList.remove('on'));
-  $('settingsOverlay').addEventListener('click', (e) => { if (e.target === $('settingsOverlay')) $('settingsOverlay').classList.remove('on'); });
+  $('settingsBtn').addEventListener('click', openSettings);
+  $('closeSettings').addEventListener('click', closeSettings);
+  $('settingsOverlay').addEventListener('click', (e) => { if (e.target === $('settingsOverlay')) closeSettings(); });
   document.querySelectorAll('.theme-card').forEach((c) => c.addEventListener('click', () => { currentSettings.theme = c.dataset.theme; applySettings(currentSettings); }));
   document.querySelectorAll('.font-card').forEach((c) => c.addEventListener('click', () => { currentSettings.font = c.dataset.font; applySettings(currentSettings); }));
   document.querySelectorAll('.bg-card').forEach((c) => c.addEventListener('click', () => { currentSettings.bg = c.dataset.bg; applySettings(currentSettings); }));
@@ -392,6 +442,16 @@
       company: '腾讯', position: '数据分析师',
       jd: `岗位职责：\n1. 负责业务数据分析，输出分析报告与洞察；\n2. 建立数据指标体系与监控看板；\n3. 支持产品/运营决策，设计 A/B 实验；\n4. 参与数据平台与数据治理工作。\n\n任职要求：\n1. 统计/数学/计算机相关专业；\n2. 熟练 SQL、Python，熟悉数据可视化；\n3. 有 A/B 实验设计经验；\n4. 良好的业务理解与沟通能力。`,
       resume: `李四 | 女 | 25 岁\n求职意向：数据分析师\n\n教育：XX 大学 统计学 硕士 2021-2024\n\n实习：某互联网公司 数据分析实习生 2023.06-2023.12\n- 做数据报表\n- 用 SQL 查询数据\n- 参与用户行为分析\n\n技能：SQL, Python, Tableau`
+    },
+    tech: {
+      company: '某互联网公司', position: '后端开发工程师',
+      jd: `岗位职责：\n1. 负责核心业务系统的后端设计与开发，保障高可用与高性能；\n2. 参与系统架构演进，优化接口性能与数据库访问；\n3. 编写技术文档，参与代码评审与技术分享。\n\n任职要求：\n1. 计算机相关专业，本科及以上学历；\n2. 熟悉 Java/Go/C++ 任一语言，熟悉 MySQL、Redis、消息队列；\n3. 有高并发、分布式系统经验优先；\n4. 熟悉 Linux 与常用排查工具。`,
+      resume: `王五 | 男 | 本科 | 2 年经验\n求职意向：后端开发工程师\n\n教育：XX 大学 软件工程 本科 2018-2022\n\n工作经历\n某科技公司 后端开发 2022.07-2024.06\n- 参与订单系统开发，写了一些接口\n- 用 MySQL 存数据，Redis 做缓存\n- 修过线上问题\n\n项目经历\n订单服务重构\n- 负责部分模块拆分\n- 接口响应变快了一些\n\n技能：Java, MySQL, Redis, Git`
+    },
+    ops: {
+      company: '某教育公司', position: '用户运营',
+      jd: `岗位职责：\n1. 负责用户生命周期运营，制定拉新、促活、留存策略；\n2. 策划并执行社群与活动运营，提升转化与复购；\n3. 搭建用户分层与指标体系，输出运营分析报告。\n\n任职要求：\n1. 本科及以上学历，1-3 年用户/社群运营经验；\n2. 数据敏感，能独立完成活动复盘；\n3. 文案与沟通能力强，有社群从 0 到 1 经验优先。`,
+      resume: `赵六 | 女 | 本科 | 2 年经验\n求职意向：用户运营\n\n教育：XX 大学 市场营销 本科 2018-2022\n\n工作经历\n某教育公司 运营专员 2022.07-2024.06\n- 负责社群日常维护，发通知、答疑\n- 策划过两次打卡活动\n- 统计活动数据并写总结\n\n技能：Excel, 微信公众号, 社群运营`
     }
   };
 
@@ -462,8 +522,93 @@
     return html;
   }
 
-  // ===== File upload =====
+  // ===== Settings modal a11y =====
+  function openSettings() {
+    applySettings(currentSettings);
+    const overlay = $('settingsOverlay');
+    overlay.classList.add('on');
+    overlay.setAttribute('aria-hidden', 'false');
+  }
+  function closeSettings() {
+    const overlay = $('settingsOverlay');
+    overlay.classList.remove('on');
+    overlay.setAttribute('aria-hidden', 'true');
+  }
+
+  // ===== Error mapping =====
+  const ERROR_TEXT = {
+    NO_API_KEY: '服务端未配置 API Key（.env 中的 LLM_API_KEY）',
+    UPSTREAM_TIMEOUT: '模型响应超时，请重试或换一个模型',
+    UPSTREAM_RATE_LIMITED: '请求过于频繁，请稍后重试',
+    UPSTREAM_ERROR: '模型服务出错，请检查 API Key 或余额',
+    UPSTREAM_NETWORK: '无法连接模型服务，请检查网络 / LLM_API_BASE',
+    UPSTREAM_INVALID: '模型返回格式异常，请重试',
+    BODY_TOO_LARGE: '内容过大，请精简后重试',
+    FILE_TOO_LARGE: '文件超过大小上限',
+    UNSUPPORTED_TYPE: '不支持的文件类型',
+    EXTRACTOR_UNAVAILABLE: '服务端缺少对应解析依赖，请先 npm install',
+    EXTRACT_EMPTY: '没有从文件中提取到文本，可能是扫描件或空文件',
+    TEXT_TOO_LONG: '文本超过长度上限，请精简后重试',
+    INVALID_REQUEST: '请求参数不完整',
+  };
+  function errorTextOf(code, message) {
+    return ERROR_TEXT[code] || message || '未知错误';
+  }
+  function readApiError(payload, response) {
+    const code = payload && payload.code;
+    const err = new Error(errorTextOf(code, (payload && payload.error) || response.statusText));
+    err.code = code || 'HTTP_' + response.status;
+    return err;
+  }
+
+  // ===== File upload (button + drag & drop) =====
+  const MAX_UPLOAD_MB = 20;
   let uploadTarget = null;
+
+  function setResultActions(enabled) {
+    ['copyBtn', 'copyMdBtn', 'downloadBtn', 'printBtn'].forEach((id) => { $(id).disabled = !enabled; });
+  }
+
+  function appendExtractedText(targetId, text) {
+    const ta = $(targetId);
+    const existing = ta.value.replace(/\s+$/, '');
+    ta.value = existing ? existing + '\n\n' + text.trim() : text.trim();
+  }
+
+  async function extractFile(file, targetId) {
+    if (!file) return;
+    if (file.size > MAX_UPLOAD_MB * 1024 * 1024) {
+      showToast(`文件超过 ${MAX_UPLOAD_MB}MB，请拆分或改为粘贴`);
+      return;
+    }
+    const btn = document.querySelector(`.upload-btn[data-target="${targetId}"]`);
+    const label = btn ? btn.textContent : '';
+    if (btn) { btn.disabled = true; btn.textContent = '解析中…'; }
+    showToast('正在提取文本…');
+    try {
+      const dataUrl = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(String(reader.result));
+        reader.onerror = () => reject(new Error('读取文件失败'));
+        reader.readAsDataURL(file);
+      });
+      const r = await fetch('/api/extract', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ filename: file.name, data: dataUrl }),
+      });
+      const payload = await r.json().catch(() => ({}));
+      if (!r.ok) throw readApiError(payload, r);
+      appendExtractedText(targetId, payload.text);
+      const chars = payload.meta ? payload.meta.chars : payload.text.length;
+      showToast(`已提取 ${chars} 字`);
+    } catch (err) {
+      showToast('提取失败：' + err.message);
+    } finally {
+      if (btn) { btn.disabled = false; btn.textContent = label; }
+    }
+  }
+
   document.querySelectorAll('.upload-btn').forEach((btn) => {
     btn.addEventListener('click', () => {
       uploadTarget = btn.dataset.target;
@@ -471,64 +616,243 @@
       $('fileInput').click();
     });
   });
-  $('fileInput').addEventListener('change', async (e) => {
+  $('fileInput').addEventListener('change', (e) => {
     const file = e.target.files && e.target.files[0];
-    if (!file || !uploadTarget) return;
-    showToast('正在提取文本…');
-    try {
-      const reader = new FileReader();
-      reader.onload = async () => {
-        const base64 = reader.result.split(',')[1];
-        const r = await fetch('/api/extract', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ filename: file.name, data: base64 }),
-        });
-        const j = await r.json();
-        if (!r.ok) throw new Error(j.error || r.statusText);
-        const ta = $(uploadTarget);
-        ta.value = (ta.value ? ta.value + '\n\n' : '') + j.text;
-        showToast('文本提取完成');
-      };
-      reader.readAsDataURL(file);
-    } catch (err) {
-      showToast('提取失败：' + err.message);
-    }
+    if (file && uploadTarget) extractFile(file, uploadTarget);
   });
 
-  $('optimizeBtn').addEventListener('click', async () => {
+  ['jd', 'resume'].forEach((id) => {
+    const ta = $(id);
+    ['dragenter', 'dragover'].forEach((ev) => ta.addEventListener(ev, (e) => {
+      e.preventDefault();
+      ta.classList.add('dragover');
+    }));
+    ['dragleave', 'dragend', 'drop'].forEach((ev) => ta.addEventListener(ev, () => ta.classList.remove('dragover')));
+    ta.addEventListener('drop', (e) => {
+      e.preventDefault();
+      const file = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+      if (file) extractFile(file, id);
+    });
+  });
+
+  // ===== Optimize: streaming render + cancel + export =====
+  let currentMarkdown = '';
+  let streamController = null;
+  let renderScheduled = false;
+  let streaming = false;
+
+  function scheduleRender() {
+    if (renderScheduled) return;
+    renderScheduled = true;
+    requestAnimationFrame(() => {
+      renderScheduled = false;
+      if (!streaming) return;
+      $('resultBody').innerHTML = mdToHtml(currentMarkdown);
+    });
+  }
+
+  function finishResult() {
+    streaming = false;
+    $('resultBody').classList.remove('streaming');
+    $('resultBody').innerHTML = mdToHtml(currentMarkdown);
+  }
+
+  function parseSseFrames(buffer) {
+    const frames = [];
+    let rest = buffer;
+    for (;;) {
+      const idx = rest.indexOf('\n\n');
+      if (idx < 0) break;
+      const raw = rest.slice(0, idx);
+      rest = rest.slice(idx + 2);
+      let event = 'message';
+      const dataLines = [];
+      for (const line of raw.split('\n')) {
+        if (line.startsWith('event:')) event = line.slice(6).trim();
+        else if (line.startsWith('data:')) dataLines.push(line.slice(5).trim());
+      }
+      if (!dataLines.length) continue;
+      let data = null;
+      try { data = JSON.parse(dataLines.join('\n')); } catch (e) { data = dataLines.join('\n'); }
+      frames.push({ event, data });
+    }
+    return { frames, rest };
+  }
+
+  async function readStream(response) {
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder('utf-8');
+    let buffer = '';
+    let meta = null;
+    let usage = null;
+    for (;;) {
+      const step = await reader.read();
+      if (step.done) break;
+      buffer += decoder.decode(step.value, { stream: true });
+      const parsed = parseSseFrames(buffer);
+      buffer = parsed.rest;
+      for (const frame of parsed.frames) {
+        if (frame.event === 'meta') {
+          meta = frame.data;
+        } else if (frame.event === 'delta' && frame.data && typeof frame.data.content === 'string') {
+          currentMarkdown += frame.data.content;
+          scheduleRender();
+        } else if (frame.event === 'done') {
+          usage = (frame.data && frame.data.usage) || null;
+        } else if (frame.event === 'error') {
+          const err = new Error(errorTextOf(frame.data && frame.data.code, frame.data && frame.data.error));
+          err.code = frame.data && frame.data.code;
+          throw err;
+        }
+      }
+    }
+    return { meta, usage };
+  }
+
+  function escapeHtml(value) {
+    return String(value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  function plainTextOf(markdown) {
+    return String(markdown || '')
+      .replace(/```[\s\S]*?```/g, (block) => block.replace(/```[^\n]*\n?/g, '').replace(/```/g, ''))
+      .replace(/^#{1,6}\s+/gm, '')
+      .replace(/\*\*(.+?)\*\*/g, '$1')
+      .replace(/`([^`]+)`/g, '$1')
+      .replace(/^\s*[-*]\s+/gm, '• ')
+      .replace(/\n{3,}/g, '\n\n')
+      .trim();
+  }
+
+  async function copyText(text, okMessage) {
+    if (!text) return;
+    try {
+      await navigator.clipboard.writeText(text);
+      showToast(okMessage);
+    } catch (e) {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand('copy'); showToast(okMessage); }
+      catch (err) { showToast('复制失败，请手动选择文本'); }
+      finally { document.body.removeChild(ta); }
+    }
+  }
+
+  async function runOptimize() {
     const jd = $('jd').value.trim();
     const resume = $('resume').value.trim();
-    if (!jd || !resume) { $('statusText').textContent = '请填写 JD 和简历'; return; }
+    if (!jd || !resume) {
+      $('statusText').textContent = '请填写 JD 和简历';
+      showToast('请先填写 JD 和简历');
+      return;
+    }
+    currentMarkdown = '';
+    streaming = true;
+    $('resultBody').classList.add('streaming');
+    $('resultBody').innerHTML = '';
     $('optimizeBtn').disabled = true;
+    $('stopBtn').disabled = false;
+    setResultActions(false);
     $('spinner').classList.add('on');
-    $('statusText').textContent = 'AI 正在优化中，请稍候…';
-    $('resultBody').textContent = '';
+    $('statusText').textContent = 'AI 正在生成，输出会实时显示…';
+    streamController = new AbortController();
+    const started = Date.now();
     try {
-      const r = await fetch('/api/optimize', {
+      const response = await fetch('/api/optimize', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ company: $('company').value.trim(), position: $('position').value.trim(), jd, resume, model: $('model').value, roleType: $('roleType').value }),
+        headers: { 'Content-Type': 'application/json', Accept: 'text/event-stream' },
+        body: JSON.stringify({
+          company: $('company').value.trim(),
+          position: $('position').value.trim(),
+          jd,
+          resume,
+          model: $('model').value,
+          roleType: $('roleType').value,
+          stream: true,
+        }),
+        signal: streamController.signal,
       });
-      const j = await r.json();
-      if (!r.ok) throw new Error(j.error || r.statusText);
-      $('resultBody').innerHTML = mdToHtml(j.content);
-      $('statusText').textContent = `完成 · ${j.model} · ${j.usage?.total_tokens || ''} tokens`;
-      $('copyBtn').disabled = false;
-      window.__lastResult = j.content;
+      const contentType = response.headers.get('content-type') || '';
+      if (!response.ok) {
+        const payload = await response.json().catch(() => ({}));
+        throw readApiError(payload, response);
+      }
+      if (!contentType.includes('text/event-stream')) {
+        const payload = await response.json();
+        if (!payload.ok) throw readApiError(payload, response);
+        currentMarkdown = payload.content || '';
+        finishResult();
+        const tokens = payload.usage && payload.usage.total_tokens ? ` · ${payload.usage.total_tokens} tokens` : '';
+        $('statusText').textContent = `完成 · ${payload.model}${tokens}`;
+      } else {
+        const result = await readStream(response);
+        finishResult();
+        const seconds = ((Date.now() - started) / 1000).toFixed(1);
+        const tokens = result.usage && result.usage.total_tokens ? ` · ${result.usage.total_tokens} tokens` : '';
+        $('statusText').textContent = `完成 · ${(result.meta && result.meta.model) || $('model').value}${tokens} · ${seconds}s`;
+      }
+      window.__lastResult = currentMarkdown;
+      setResultActions(Boolean(currentMarkdown));
       showToast('优化完成');
-    } catch (e) {
-      $('resultBody').textContent = '出错：' + e.message;
-      $('statusText').textContent = '失败';
+    } catch (err) {
+      finishResult();
+      if (err.name === 'AbortError') {
+        $('statusText').textContent = currentMarkdown ? '已停止（保留已生成部分）' : '已停止生成';
+        showToast('已停止生成');
+      } else {
+        $('statusText').textContent = '失败';
+        $('resultBody').innerHTML = `<div class="error-box">${escapeHtml(err.message)}</div>`;
+        window.__lastResult = currentMarkdown;
+      }
+      if (currentMarkdown) setResultActions(true);
     } finally {
+      streaming = false;
+      streamController = null;
       $('optimizeBtn').disabled = false;
+      $('stopBtn').disabled = true;
       $('spinner').classList.remove('on');
     }
-  });
+  }
 
-  $('copyBtn').addEventListener('click', async () => {
-    try { await navigator.clipboard.writeText(window.__lastResult || ''); showToast('已复制到剪贴板'); }
-    catch (e) { showToast('复制失败'); }
+  $('optimizeBtn').addEventListener('click', runOptimize);
+  $('stopBtn').addEventListener('click', () => { if (streamController) streamController.abort(); });
+
+  $('copyBtn').addEventListener('click', () => {
+    copyText(plainTextOf(window.__lastResult || currentMarkdown), '已复制纯文本');
+  });
+  $('copyMdBtn').addEventListener('click', () => {
+    copyText(window.__lastResult || currentMarkdown, '已复制 Markdown');
+  });
+  $('downloadBtn').addEventListener('click', () => {
+    const text = window.__lastResult || currentMarkdown;
+    if (!text) return;
+    const company = $('company').value.trim() || '公司';
+    const position = $('position').value.trim() || '岗位';
+    const safeName = `${company}-${position}-简历优化`.replace(/[\\/:*?"<>|]/g, '_');
+    const blob = new Blob([text], { type: 'text/markdown;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${safeName}.md`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    showToast('已下载 Markdown 文件');
+  });
+  $('printBtn').addEventListener('click', () => window.print());
+
+  document.addEventListener('keydown', (e) => {
+    const optimizerActive = document.getElementById('view-optimizer').classList.contains('active');
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter' && optimizerActive && !$('optimizeBtn').disabled) {
+      e.preventDefault();
+      runOptimize();
+    }
+    if (e.key === 'Escape' && $('settingsOverlay').classList.contains('on')) closeSettings();
   });
 </script>
 </body>

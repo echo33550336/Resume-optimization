@@ -1,17 +1,23 @@
 {
   "name": "resume-optimizer",
-  "version": "1.0.0",
-  "description": "Vibecoding 简历智能优化系统 - 基于岗位 JD 的简历深度优化",
+  "version": "1.1.0",
+  "description": "Tailor a resume to a job description with a streaming, fully local LLM optimizer",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "node server.js"
+    "dev": "node server.js",
+    "check": "node --check server.js && node --check prompt.js"
+  },
+  "engines": {
+    "node": ">=18"
   },
   "keywords": [
     "resume",
     "optimizer",
     "vibecoding",
-    "ai"
+    "ai",
+    "llm",
+    "sse"
   ],
   "license": "MIT",
   "dependencies": {

@@ -5,7 +5,7 @@ argument-hint: "<company> <position> --jd <jd text or file> --resume <resume tex
 license: MIT
 metadata:
   author: echo33550336
-  version: "1.0.0"
+  version: "1.1.0"
   category: productivity
 external_urls:
   - "User-configured OpenAI-compatible LLM endpoint (e.g. https://api.openai.com, https://tokenhub.tencentmaas.com)"
@@ -36,6 +36,11 @@ Collect these before running:
 If any input is missing, ask the user. Do not fabricate resume content.
 
 ## System prompt (HR director persona)
+
+> **Source of truth:** the canonical prompt lives in [`prompt.js`](../../../prompt.js)
+> (`SYSTEM_PROMPT`, `ROLE_FOCUS`, `buildSystemPrompt()`, `buildUserPrompt()`).
+> The web app imports it directly; the copy below is for skill-only/agent usage.
+> If you change one, change both — but prefer keeping `prompt.js` authoritative.
 
 Use this system prompt verbatim when calling the LLM:
 
@@ -92,10 +97,13 @@ Use this system prompt verbatim when calling the LLM:
 
 ## Web app (optional)
 
-The repo ships a zero-dependency Node.js web app (`server.js` + `public/index.html`) that implements
-this workflow with a UI: landing page, optimizer form with file upload, theme/font/background
-switcher, and Markdown result rendering. Run with `npm start` (default port 3000). Configure the
-LLM via `.env` (OpenAI-compatible endpoint).
+The repo ships a Node.js web app (`server.js` + `prompt.js` + `public/index.html`) that implements
+this workflow with a UI: landing page, optimizer form with drag-and-drop upload, streaming Markdown
+output with stop/copy/download/print, theme/font/background switcher. Run with `npm start`
+(default `http://127.0.0.1:3000`). Configure the LLM via `.env` (OpenAI-compatible endpoint).
+
+The server also accepts `roleType` (tech/product/data/ops/design/marketing/general) and appends the
+matching focus hints from `prompt.js`; keep that behaviour when reusing this skill outside the app.
 
 ## Output format
 
