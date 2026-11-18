@@ -5,7 +5,7 @@
 [![Node](https://img.shields.io/badge/node-%3E%3D18-brightgreen)](https://nodejs.org)
 [![License](https://img.shields.io/badge/license-MIT-blue)](./LICENSE)
 [![Backend](https://img.shields.io/badge/backend-zero--framework-black)](server.js)
-[![Streaming](https://img.shields.io/badge/output-SSE-purple)](#streaming-sse)
+[![Streaming](https://img.shields.io/badge/output-SSE-purple)](#features)
 
 ---
 
