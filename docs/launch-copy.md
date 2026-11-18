@@ -4,6 +4,26 @@
 
 原则：一次只发一个渠道，观察 24 小时数据再发下一个；所有文案都要**说清楚你是作者**，不要伪装成用户推荐。
 
+## 0. 现状（2026-11-18 核对）
+
+已就绪，可直接用：
+
+| 项目                          | 状态                          | 链接 / 命令                                                                                             |
+| ----------------------------- | ----------------------------- | ------------------------------------------------------------------------------------------------------- |
+| Pages 在线演示（免 Key 回放） | ✅ 200                        | <https://echo33550336.github.io/Resume-optimization/>                                                   |
+| 社交预览图 1280×640           | ✅ 已上传（哈希与本地图一致） | 仓库页 `og:image`                                                                                       |
+| README 首屏 GIF + 4 张截图    | ✅ 已提交                     | `docs/assets/demo.gif`                                                                                  |
+| GHCR 镜像                     | ✅ `1.5.0` / `1.5` / `latest` | `docker run --rm -p 127.0.0.1:3000:3000 --env-file .env ghcr.io/echo33550336/resume-optimization:1.5.0` |
+| 中文 README                   | ✅                            | `README.zh-CN.md`                                                                                       |
+
+还需本人网页操作（AI 无 token 无法代做）：
+
+- [ ] About → Homepage 填 `https://echo33550336.github.io/Resume-optimization/`
+- [ ] About → Topics 填 `resume, resume-builder, llm, streaming, sse, nodejs, self-hosted, bilingual, ats, docker`
+- [ ] 建 Release `v1.5.0`（tag 已推送，正文见下）
+
+**所有渠道文案都建议带上 demo 链接**——不用装、不用 key，点开就能看到流式生成，这是转化率最高的一行。
+
 ---
 
 ## 1. Show HN（英文，首选）
@@ -30,10 +50,14 @@ the model endpoint you configure in .env (Tencent Hunyuan by default; anything s
 chat-completions protocol works).
 
 The backend is one ~700-line file. No Express, no build step. I added type checking (JSDoc +
-tsc), ESLint/Prettier, 19 tests, a CI matrix (Node 18/20/22 + Docker), and a non-root container.
+tsc), ESLint/Prettier, 23 tests (including integration tests that spawn the real server), a CI
+matrix (Node 18/20/22 + Docker), and a non-root container.
 
 Known limitations: no auth (bind to localhost), the report quality depends on your model, and
 uploads need optional extractors (pdf-parse / mammoth / tesseract.js).
+
+Try it without installing anything: https://echo33550336.github.io/Resume-optimization/ (demo
+mode replays a canned report over the same SSE stream, no API key needed).
 
 Repo: https://github.com/echo33550336/Resume-optimization
 Happy to answer anything about the prompt design or the SSE plumbing.
@@ -65,6 +89,8 @@ Deployment: `docker run -p 127.0.0.1:3000:3000 --env-file .env ghcr.io/echo33550
 Config: LLM_API_BASE + LLM_MODEL (defaults to Tencent Hunyuan; any chat-completions endpoint works).
 No auth by design — it binds to 127.0.0.1 and expects a reverse proxy if you expose it.
 
+Try it without deploying: https://echo33550336.github.io/Resume-optimization/ (demo mode, no key).
+
 Code: https://github.com/echo33550336/Resume-optimization (MIT)
 Feedback welcome, especially on the prompt structure and what to add next.
 ```
@@ -95,6 +121,9 @@ ChatGPT 又总是"帮我润色一下"，没有评分、没有改动理由，还�
 docker run --rm -p 127.0.0.1:3000:3000 --env-file .env \
   ghcr.io/echo33550336/resume-optimization:latest
 
+没装环境也能先看：https://echo33550336.github.io/Resume-optimization/ （免 Key 的 demo 回放，
+同一套 SSE 流式输出，点开就能看到效果）
+
 仓库（MIT）：https://github.com/echo33550336/Resume-optimization
 只有 1 star，欢迎试用和拍砖；如果对 prompt 设计或 SSE 实现感兴趣，可以看 prompt.js 和
 server.js，都是单文件。
@@ -119,11 +148,12 @@ server.js，都是单文件。
 3. SSE 转发：为什么服务端要自己解析上游流、心跳、客户端断开检测、`emitted` 之后不再重试
 4. 错误分类：502/504/429/499 各自对应用户看到的什么话
 5. prompt 单一来源：`prompt.js` + Agent Skill 不漂移
-6. 工程化：JSDoc + tsc、ESLint、19 个测试（含真实 spawn 服务的集成测试）、CI 矩阵
+6. 工程化：JSDoc + tsc、ESLint、23 个测试（含真实 spawn 服务的集成测试）、CI 矩阵
 7. 踩坑：`node --test test/` 在 Node 22 上把目录当模块
 8. 数据：用混元跑一次大概多少 token、多少钱
 
 **投放**：掘金 + 知乎同发；知乎问题下回答要带具体实现细节，不带"快来看我的项目"。
+文末统一放：demo <https://echo33550336.github.io/Resume-optimization/> + repo <https://github.com/echo33550336/Resume-optimization>。
 
 ---
 
@@ -143,6 +173,7 @@ server.js，都是单文件。
 重点：它会告诉你面试官会追问什么（缺口与风险那一栏），比单纯"润色一下"有用得多。
 
 可以自己部署（数据不上传第三方），也可以用 Docker 一行起。
+先看效果（免 Key demo）：https://echo33550336.github.io/Resume-optimization/
 前后对比截图我放在评论区 👀
 ```
 
@@ -163,6 +194,7 @@ server.js，都是单文件。
    model endpoint you configure (.env, Hunyuan by default).
 
 4/ Docker: ghcr.io/echo33550336/resume-optimization:latest
+   Live demo (no key): https://echo33550336.github.io/Resume-optimization/
    Code (MIT): https://github.com/echo33550336/Resume-optimization
 ```
 
@@ -170,12 +202,53 @@ server.js，都是单文件。
 
 ## 7. 发布节奏建议
 
-| 天       | 动作                                                      |
-| -------- | --------------------------------------------------------- |
-| D-1      | 补 About/Topics/社交预览/GIF，确认 README 首屏 3 秒能看懂 |
-| D1       | Show HN（美东上午）；当天回所有评论                       |
-| D3       | V2EX 分享创造                                             |
-| D5       | r/selfhosted                                              |
-| D7       | 掘金 + 知乎技术文                                         |
-| D10      | 小红书（配前后对比图）                                    |
-| 之后每周 | 回 issue、收集反馈、打 release、PR 进 awesome-selfhosted  |
+| 天       | 动作                                                                                                           |
+| -------- | -------------------------------------------------------------------------------------------------------------- |
+| D-1      | ✅ 已完成：About 描述、社交预览、GIF/截图、Pages demo、GHCR；⏳ 待做：About 的 Topics/Homepage、Release v1.5.0 |
+| D1       | V2EX 分享创造（中文首站，选题最贴）                                                                            |
+| D2       | 掘金 + 知乎技术文（吃 SEO，长期流量）                                                                          |
+| D4       | Show HN（美东 8:00–10:00，当天回所有评论）                                                                     |
+| D6       | r/selfhosted                                                                                                   |
+| D8       | X 线程 + 小红书（配前后对比图）                                                                                |
+| 之后每周 | 回 issue、收集反馈、打 release、PR 进 awesome-selfhosted                                                       |
+
+---
+
+## 8. GitHub Release `v1.5.0` 正文（复制粘贴）
+
+仓库 → **Releases** → **Draft a new release** → 选 tag `v1.5.0` → 标题
+
+> v1.5.0 — demo mode, media, Docker
+
+正文：
+
+````markdown
+Demo mode (no API key), recorded GIF and screenshots, a static GitHub Pages demo,
+and container publishing on tags.
+
+### Added
+
+- `demo: true` on `/api/optimize` replays a canned report over the same SSE stream
+- "Try a demo (no key)" button and `?demo=1` deep link in the UI
+- Recorded demo GIF, four screenshots and a 1280x640 social preview image
+- Static demo page for GitHub Pages (`docs/`, no build step)
+- GHCR publishing on tags; Docker Hub workflow runs once `DOCKERHUB_TOKEN` is set
+
+### Quality
+
+- 23 tests (prompt, i18n, demo report, integration against a spawned server)
+- `tsc --noEmit` on JSDoc-typed JS, ESLint + Prettier, CI on Node 18/20/22 + Docker image build
+
+### Install
+
+```bash
+docker run --rm -p 127.0.0.1:3000:3000 --env-file .env \
+  ghcr.io/echo33550336/resume-optimization:1.5.0
+```
+````
+
+**Full changelog:** https://github.com/echo33550336/Resume-optimization/compare/v1.4.0...v1.5.0
+
+```
+
+```
