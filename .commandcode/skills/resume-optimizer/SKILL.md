@@ -1,11 +1,11 @@
 ---
 name: resume-optimizer
-description: Optimize a resume against a target job description (JD). Use when the user asks to optimize/rewrite/improve a resume, tailor a resume to a job posting, diagnose resume-JD match, or generate an optimized resume with STAR-format bullets and match score.
-argument-hint: "<company> <position> --jd <jd text or file> --resume <resume text or file>"
+description: Optimize a resume against a target job description (JD). Use when the user asks to optimize/rewrite/improve a resume, tailor a resume to a job posting, diagnose resume-JD match, or generate an optimized resume with STAR-format bullets and match score. Outputs Chinese or English depending on the requested language.
+argument-hint: "<company> <position> --jd <jd text or file> --resume <resume text or file> [--lang zh|en]"
 license: MIT
 metadata:
   author: echo33550336
-  version: "1.1.0"
+  version: "1.2.0"
   category: productivity
 external_urls:
   - "User-configured OpenAI-compatible LLM endpoint (e.g. https://api.openai.com, https://tokenhub.tencentmaas.com)"
@@ -32,14 +32,15 @@ Collect these before running:
 2. **Job type** — one of: tech, product, data, ops, design, marketing, general. Adjusts optimization focus.
 3. **Job description (JD)** — full text. Accept pasted text or extracted from a file (PDF/DOCX/TXT/image via OCR).
 4. **Resume** — full text. Accept pasted text or extracted from a file.
+5. **Language** — `zh` or `en` (default `zh`). Controls both the prompt copy and the language of the report; the web app sends the language currently selected in the UI switch.
 
 If any input is missing, ask the user. Do not fabricate resume content.
 
 ## System prompt (HR director persona)
 
 > **Source of truth:** the canonical prompt lives in [`prompt.js`](../../../prompt.js)
-> (`SYSTEM_PROMPT`, `ROLE_FOCUS`, `buildSystemPrompt()`, `buildUserPrompt()`).
-> The web app imports it directly; the copy below is for skill-only/agent usage.
+> (`SYSTEM_PROMPTS.zh` / `SYSTEM_PROMPTS.en`, `ROLE_FOCUS`, `buildSystemPrompt()`, `buildUserPrompt()`,
+> `normalizeLang()`). The web app imports it directly; the copy below is for skill-only/agent usage.
 > If you change one, change both — but prefer keeping `prompt.js` authoritative.
 
 Use this system prompt verbatim when calling the LLM:

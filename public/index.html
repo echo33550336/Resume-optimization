@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>职优简历 · AI 智能优化系统</title>
+<title data-i18n="app.title">职优简历 · AI 智能优化系统</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&family=Noto+Serif+SC:wght@400;700&display=swap" rel="stylesheet">
@@ -204,7 +204,7 @@
   @media print {
     header, .hero, .features, .tech-section, .highlights, .steps,
     #settingsOverlay, #toast, .optimizer-grid, .result-actions, .status,
-    .section-title, .nav-link, #health { display: none !important; }
+    .section-title, .nav-link, #health, .lang-switch { display: none !important; }
     body { background: #fff !important; color: #000 !important; }
     body::before { display: none !important; }
     .view { display: none !important; }
@@ -215,71 +215,83 @@
     .result-body h1, .result-body h2, .result-body h3 { color: #000 !important; break-after: avoid; }
     .result-body pre, .result-body code { background: #f4f4f4 !important; color: #000 !important; }
   }
+
+  /* Language switcher */
+  .lang-switch { display: inline-flex; align-items: center; gap: 2px; padding: 2px; border: 1px solid var(--border); border-radius: 999px; background: var(--panel2); }
+  .lang-btn { border: none; background: transparent; color: var(--muted); font: inherit; font-size: 12px; line-height: 1; padding: 6px 10px; border-radius: 999px; cursor: pointer; transition: background .15s, color .15s; }
+  .lang-btn:hover { color: var(--accent); }
+  .lang-btn.active { background: var(--accent-soft); color: var(--accent); font-weight: 700; }
+  html[lang="en"] .hero h2 { letter-spacing: -0.3px; }
+  html[lang="en"] .result-body, html[lang="en"] textarea { line-height: 1.7; }
 </style>
 </head>
 <body>
 <header>
-  <div class="brand" onclick="showView('landing')">
-    <img src="/logo.svg" alt="职优简历" class="logo-img" />
+  <div class="brand" onclick="showView('landing')" role="button" tabindex="0" data-i18n-aria-label="aria.logo">
+    <img src="/logo.svg" alt="职优简历" class="logo-img" data-i18n-alt="aria.logo" />
   </div>
   <div class="header-right">
-    <span class="nav-link" data-view="landing" role="button" tabindex="0">首页</span>
-    <span class="nav-link" data-view="optimizer" role="button" tabindex="0">优化简历</span>
-    <div class="badge" id="health" role="status" aria-live="polite">● 检查中…</div>
-    <button class="icon-btn" id="settingsBtn" title="外观设置" aria-label="外观设置" aria-haspopup="dialog">⚙</button>
+    <span class="nav-link" data-view="landing" role="button" tabindex="0" data-i18n="nav.home">首页</span>
+    <span class="nav-link" data-view="optimizer" role="button" tabindex="0" data-i18n="nav.optimizer">优化简历</span>
+    <div class="badge" id="health" role="status" aria-live="polite" data-i18n="health.checking">● 检查中…</div>
+    <div class="lang-switch" role="group" data-i18n-aria-label="aria.lang">
+      <button type="button" class="lang-btn" data-lang="zh" aria-pressed="true">中文</button>
+      <button type="button" class="lang-btn" data-lang="en" aria-pressed="false">EN</button>
+    </div>
+    <button class="icon-btn" id="settingsBtn" title="外观设置" aria-label="外观设置" aria-haspopup="dialog" data-i18n-title="aria.settings" data-i18n-aria-label="aria.settings">⚙</button>
   </div>
 </header>
 
 <!-- Landing -->
 <div id="view-landing" class="view active">
   <section class="hero">
-    <h2>让简历 <span class="hl">精准匹配</span> 目标岗位</h2>
-    <p>粘贴岗位 JD 与你的简历，AI 扮演 10 年经验 HR 总监，输出匹配度诊断、优化后的简历、关键修改说明与待补充项。三分钟，让简历通过率翻倍。</p>
+    <h2 data-i18n="hero.title">让简历 <span class="hl">精准匹配</span> 目标岗位</h2>
+    <p data-i18n="hero.lead">粘贴岗位 JD 与你的简历，AI 扮演 10 年经验 HR 总监，输出匹配度诊断、优化后的简历、关键修改说明与待补充项。三分钟，让简历通过率翻倍。</p>
     <div class="hero-cta">
-      <button class="btn" onclick="showView('optimizer')">开始优化简历</button>
-      <button class="btn btn-secondary" onclick="loadExampleAndGo()">先看示例</button>
+      <button class="btn" onclick="showView('optimizer')" data-i18n="hero.cta.optimize">开始优化简历</button>
+      <button class="btn btn-secondary" onclick="loadExampleAndGo()" data-i18n="hero.cta.example">先看示例</button>
     </div>
   </section>
 
-  <div class="section-title"><h3>核心能力</h3><p>围绕简历优化的完整链路，从诊断到交付</p></div>
+  <div class="section-title"><h3 data-i18n="section.core.title">核心能力</h3><p data-i18n="section.core.body">围绕简历优化的完整链路，从诊断到交付</p></div>
   <section class="features">
-    <div class="feat"><div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/></svg></div><h3>JD 精准匹配</h3><p>基于岗位要求深度分析，突出与 JD 高度相关的经历与关键词。</p></div>
-    <div class="feat"><div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></div><h3>STAR 法则重写</h3><p>每条经历用 STAR 法则重写，量化成果，告别空洞描述。</p></div>
-    <div class="feat"><div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="20" x2="4" y2="10"/><line x1="10" y1="20" x2="10" y2="4"/><line x1="16" y1="20" x2="16" y2="14"/><line x1="22" y1="20" x2="22" y2="8"/></svg></div><h3>匹配度评分</h3><p>0-100 分匹配度诊断，附带具体改进理由。</p></div>
-    <div class="feat"><div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r="2.5"/><path d="M17.5 10.5c1.5 0 3 .5 4 2"/><circle cx="6" cy="13" r="3"/><path d="M2 21c0-3 2-5 4-5s4 2 4 5"/><path d="M14 21c0-2 1.5-3.5 3.5-3.5S21 19 21 21"/></svg></div><h3>主题可切换</h3><p>金色 / 琥珀金 / 暗金，字体与背景自由选。</p></div>
-    <div class="feat"><div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div><h3>秒级生成</h3><p>大模型驱动，几秒输出完整优化简历。</p></div>
-    <div class="feat"><div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 6v6c0 5 3.5 9.5 8 10 4.5-.5 8-5 8-10V6z"/><path d="m9 12 2 2 4-4"/></svg></div><h3>隐私安全</h3><p>简历仅在本地与模型间传输，不存储。</p></div>
+    <div class="feat"><div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/></svg></div><h3 data-i18n="feat.jd.title">JD 精准匹配</h3><p data-i18n="feat.jd.body">基于岗位要求深度分析，突出与 JD 高度相关的经历与关键词。</p></div>
+    <div class="feat"><div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></div><h3 data-i18n="feat.star.title">STAR 法则重写</h3><p data-i18n="feat.star.body">每条经历用 STAR 法则重写，量化成果，告别空洞描述。</p></div>
+    <div class="feat"><div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="20" x2="4" y2="10"/><line x1="10" y1="20" x2="10" y2="4"/><line x1="16" y1="20" x2="16" y2="14"/><line x1="22" y1="20" x2="22" y2="8"/></svg></div><h3 data-i18n="feat.score.title">匹配度评分</h3><p data-i18n="feat.score.body">0-100 分匹配度诊断，附带具体改进理由。</p></div>
+    <div class="feat"><div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r="2.5"/><path d="M17.5 10.5c1.5 0 3 .5 4 2"/><circle cx="6" cy="13" r="3"/><path d="M2 21c0-3 2-5 4-5s4 2 4 5"/><path d="M14 21c0-2 1.5-3.5 3.5-3.5S21 19 21 21"/></svg></div><h3 data-i18n="feat.theme.title">主题可切换</h3><p data-i18n="feat.theme.body">金色 / 琥珀金 / 暗金，字体与背景自由选。</p></div>
+    <div class="feat"><div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div><h3 data-i18n="feat.speed.title">秒级生成</h3><p data-i18n="feat.speed.body">大模型驱动，几秒输出完整优化简历。</p></div>
+    <div class="feat"><div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 6v6c0 5 3.5 9.5 8 10 4.5-.5 8-5 8-10V6z"/><path d="m9 12 2 2 4-4"/></svg></div><h3 data-i18n="feat.privacy.title">隐私安全</h3><p data-i18n="feat.privacy.body">简历仅在本地与模型间传输，不存储。</p></div>
   </section>
 
-  <div class="section-title"><h3>技术栈</h3><p>零依赖后端 + 可插拔文档解析，开箱即用</p></div>
+  <div class="section-title"><h3 data-i18n="section.tech.title">技术栈</h3><p data-i18n="section.tech.body">零依赖后端 + 可插拔文档解析，开箱即用</p></div>
   <section class="tech-section">
     <div class="tech-grid">
-      <div class="tech-card"><div class="ticon">N</div><div><div class="tname">Node.js</div><div class="tdesc">原生 http，零框架依赖</div></div></div>
-      <div class="tech-card"><div class="ticon">AI</div><div><div class="tname">Hunyuan 2.0</div><div class="tdesc">腾讯混元大模型</div></div></div>
-      <div class="tech-card"><div class="ticon">P</div><div><div class="tname">pdf-parse</div><div class="tdesc">PDF 简历文本提取</div></div></div>
-      <div class="tech-card"><div class="ticon">W</div><div><div class="tname">mammoth</div><div class="tdesc">DOCX 简历文本提取</div></div></div>
-      <div class="tech-card"><div class="ticon">O</div><div><div class="tname">Tesseract.js</div><div class="tdesc">图片 OCR（中英）</div></div></div>
-      <div class="tech-card"><div class="ticon">UI</div><div><div class="tname">原生 HTML/CSS/JS</div><div class="tdesc">无前端框架，轻量</div></div></div>
-      <div class="tech-card"><div class="ticon">MD</div><div><div class="tname">Markdown</div><div class="tdesc">结构化输出渲染</div></div></div>
-      <div class="tech-card"><div class="ticon">⚙</div><div><div class="tname">主题系统</div><div class="tdesc">金色/字体/背景可切换</div></div></div>
+      <div class="tech-card"><div class="ticon">N</div><div><div class="tname" data-i18n="tech.node.name">Node.js</div><div class="tdesc" data-i18n="tech.node.body">原生 http，零框架依赖</div></div></div>
+      <div class="tech-card"><div class="ticon">AI</div><div><div class="tname" data-i18n="tech.hunyuan.name">Hunyuan 2.0</div><div class="tdesc" data-i18n="tech.hunyuan.body">腾讯混元大模型</div></div></div>
+      <div class="tech-card"><div class="ticon">P</div><div><div class="tname" data-i18n="tech.pdf.name">pdf-parse</div><div class="tdesc" data-i18n="tech.pdf.body">PDF 简历文本提取</div></div></div>
+      <div class="tech-card"><div class="ticon">W</div><div><div class="tname" data-i18n="tech.docx.name">mammoth</div><div class="tdesc" data-i18n="tech.docx.body">DOCX 简历文本提取</div></div></div>
+      <div class="tech-card"><div class="ticon">O</div><div><div class="tname" data-i18n="tech.ocr.name">Tesseract.js</div><div class="tdesc" data-i18n="tech.ocr.body">图片 OCR（中英）</div></div></div>
+      <div class="tech-card"><div class="ticon">UI</div><div><div class="tname" data-i18n="tech.vanilla.name">原生 HTML/CSS/JS</div><div class="tdesc" data-i18n="tech.vanilla.body">无前端框架，轻量</div></div></div>
+      <div class="tech-card"><div class="ticon">MD</div><div><div class="tname" data-i18n="tech.md.name">Markdown</div><div class="tdesc" data-i18n="tech.md.body">结构化输出渲染</div></div></div>
+      <div class="tech-card"><div class="ticon">⚙</div><div><div class="tname" data-i18n="tech.theme.name">主题系统</div><div class="tdesc" data-i18n="tech.theme.body">金色/字体/背景可切换</div></div></div>
     </div>
   </section>
 
-  <div class="section-title"><h3>产品亮点</h3><p>不只是改 wording，而是匹配岗位的系统性优化</p></div>
+  <div class="section-title"><h3 data-i18n="section.hl.title">产品亮点</h3><p data-i18n="section.hl.body">不只是改 wording，而是匹配岗位的系统性优化</p></div>
   <section class="highlights">
-    <div class="hl-card"><h4>匹配度诊断</h4><p>0-100 分量化评分，附具体差距理由，让求职者清楚知道哪里需要补强。</p></div>
-    <div class="hl-card"><h4>STAR 法则重写</h4><p>每条经历按 Situation-Task-Action-Result 重写，突出可量化的成果。</p></div>
-    <div class="hl-card"><h4>多格式输入</h4><p>支持文本粘贴与 PDF/Word/图片上传，自动提取简历与 JD 文本。</p></div>
-    <div class="hl-card"><h4>隐私安全</h4><p>简历仅在本地与模型间传输，不落库、不存储，用完即走。</p></div>
+    <div class="hl-card"><h4 data-i18n="hl.match.title">匹配度诊断</h4><p data-i18n="hl.match.body">0-100 分量化评分，附具体差距理由，让求职者清楚知道哪里需要补强。</p></div>
+    <div class="hl-card"><h4 data-i18n="hl.star.title">STAR 法则重写</h4><p data-i18n="hl.star.body">每条经历按 Situation-Task-Action-Result 重写，突出可量化的成果。</p></div>
+    <div class="hl-card"><h4 data-i18n="hl.formats.title">多格式输入</h4><p data-i18n="hl.formats.body">支持文本粘贴与 PDF/Word/图片上传，自动提取简历与 JD 文本。</p></div>
+    <div class="hl-card"><h4 data-i18n="hl.privacy.title">隐私安全</h4><p data-i18n="hl.privacy.body">简历仅在本地与模型间传输，不落库、不存储，用完即走。</p></div>
   </section>
 
   <section class="steps">
-    <h3>三步完成优化</h3>
+    <h3 data-i18n="steps.title">三步完成优化</h3>
     <div class="step-list">
-      <div class="step"><div class="num">1</div><div class="t">粘贴 JD</div><div class="d">输入目标岗位与岗位要求</div></div>
-      <div class="step"><div class="num">2</div><div class="t">粘贴简历</div><div class="d">输入你的完整简历内容</div></div>
-      <div class="step"><div class="num">3</div><div class="t">一键优化</div><div class="d">AI 生成优化版简历</div></div>
-      <div class="step"><div class="num">4</div><div class="t">复制使用</div><div class="d">复制结果，投递岗位</div></div>
+      <div class="step"><div class="num">1</div><div class="t" data-i18n="step1.title">粘贴 JD</div><div class="d" data-i18n="step1.body">输入目标岗位与岗位要求</div></div>
+      <div class="step"><div class="num">2</div><div class="t" data-i18n="step2.title">粘贴简历</div><div class="d" data-i18n="step2.body">输入你的完整简历内容</div></div>
+      <div class="step"><div class="num">3</div><div class="t" data-i18n="step3.title">一键优化</div><div class="d" data-i18n="step3.body">AI 生成优化版简历</div></div>
+      <div class="step"><div class="num">4</div><div class="t" data-i18n="step4.title">复制使用</div><div class="d" data-i18n="step4.body">复制结果，投递岗位</div></div>
     </div>
   </section>
 </div>
@@ -289,96 +301,96 @@
   <div class="app-wrap">
     <div class="optimizer-grid">
       <section class="card">
-        <h2><span class="dot"></span>目标岗位</h2>
+        <h2><span class="dot"></span><span data-i18n="opt.target.title">目标岗位</span></h2>
         <div class="row">
-          <div><label>公司名称</label><input id="company" placeholder="例如：字节跳动" /></div>
-          <div><label>岗位名称</label><input id="position" placeholder="例如：AI 产品经理" /></div>
+          <div><label data-i18n="label.company">公司名称</label><input id="company" placeholder="例如：字节跳动" data-i18n-placeholder="placeholder.company" /></div>
+          <div><label data-i18n="label.position">岗位名称</label><input id="position" placeholder="例如：AI 产品经理" data-i18n-placeholder="placeholder.position" /></div>
         </div>
-        <div><label>岗位要求（JD） <button type="button" class="upload-btn" data-target="jd">📎 上传文件</button></label><textarea id="jd" placeholder="粘贴岗位 JD 全文，或上传 PDF/Word/图片…"></textarea><div class="drop-hint">支持拖拽 PDF / Word / 图片 / TXT 到输入框</div></div>
+        <div><label><span data-i18n="label.jd">岗位要求（JD）</span> <button type="button" class="upload-btn" data-target="jd" data-i18n="upload.file">📎 上传文件</button></label><textarea id="jd" placeholder="粘贴岗位 JD 全文，或上传 PDF/Word/图片…" data-i18n-placeholder="placeholder.jd"></textarea><div class="drop-hint" data-i18n="drop.jd">支持拖拽 PDF / Word / 图片 / TXT 到输入框</div></div>
         <div class="examples">
-          <span class="chip" data-example="pm" role="button" tabindex="0">AI 产品经理 示例</span>
-          <span class="chip" data-example="data" role="button" tabindex="0">数据分析师 示例</span>
-          <span class="chip" data-example="tech" role="button" tabindex="0">后端开发 示例</span>
-          <span class="chip" data-example="ops" role="button" tabindex="0">用户运营 示例</span>
+          <span class="chip" data-example="pm" role="button" tabindex="0" data-i18n="example.pm">AI 产品经理 示例</span>
+          <span class="chip" data-example="data" role="button" tabindex="0" data-i18n="example.data">数据分析师 示例</span>
+          <span class="chip" data-example="tech" role="button" tabindex="0" data-i18n="example.tech">后端开发 示例</span>
+          <span class="chip" data-example="ops" role="button" tabindex="0" data-i18n="example.ops">用户运营 示例</span>
         </div>
       </section>
       <section class="card">
-        <h2><span class="dot"></span>我的简历</h2>
-        <div><label>完整简历内容 <button type="button" class="upload-btn" data-target="resume">📎 上传文件</button></label><textarea id="resume" style="min-height: 260px;" placeholder="粘贴你的完整简历内容，或上传 PDF/Word/图片…"></textarea><div class="drop-hint">支持拖拽文件到输入框，也可直接粘贴</div></div>
+        <h2><span class="dot"></span><span data-i18n="label.resume">我的简历</span></h2>
+        <div><label><span data-i18n="label.resume">完整简历内容</span> <button type="button" class="upload-btn" data-target="resume" data-i18n="upload.file">📎 上传文件</button></label><textarea id="resume" style="min-height: 260px;" placeholder="粘贴你的完整简历内容，或上传 PDF/Word/图片…" data-i18n-placeholder="placeholder.resume"></textarea><div class="drop-hint" data-i18n="drop.resume">支持拖拽文件到输入框，也可直接粘贴</div></div>
         <div class="row">
           <div>
-            <label>岗位类型</label>
+            <label data-i18n="label.roleType">岗位类型</label>
             <select id="roleType">
-              <option value="general">通用</option>
-              <option value="tech">技术开发</option>
-              <option value="product">产品</option>
-              <option value="data">数据</option>
-              <option value="ops">运营</option>
-              <option value="design">设计</option>
-              <option value="marketing">市场</option>
+              <option value="general" data-i18n="role.general">通用</option>
+              <option value="tech" data-i18n="role.tech">技术开发</option>
+              <option value="product" data-i18n="role.product">产品</option>
+              <option value="data" data-i18n="role.data">数据</option>
+              <option value="ops" data-i18n="role.ops">运营</option>
+              <option value="design" data-i18n="role.design">设计</option>
+              <option value="marketing" data-i18n="role.marketing">市场</option>
             </select>
           </div>
           <div>
-            <label>模型</label>
+            <label data-i18n="label.model">模型</label>
             <select id="model">
-              <option value="hunyuan-2.0-instruct-20251111">Hunyuan 2.0 Instruct（推荐）</option>
-              <option value="hunyuan-2.0-thinking-20251109">Hunyuan 2.0 Thinking</option>
+              <option value="hunyuan-2.0-instruct-20251111" data-i18n="model.hunyuan">Hunyuan 2.0 Instruct（推荐）</option>
+              <option value="hunyuan-2.0-thinking-20251109" data-i18n="model.thinking">Hunyuan 2.0 Thinking</option>
             </select>
           </div>
         </div>
-        <div><label>操作</label><button class="btn" id="optimizeBtn">开始优化简历</button></div>
+        <div><label data-i18n="label.action">操作</label><button class="btn" id="optimizeBtn" data-i18n="btn.optimize">开始优化简历</button></div>
       </section>
     </div>
     <section class="result">
-      <h2>优化结果</h2>
+      <h2 data-i18n="result.title">优化结果</h2>
       <div class="meta">
-        <div class="status"><span class="spinner" id="spinner"></span><span id="statusText" aria-live="polite">等待输入…</span></div>
+        <div class="status"><span class="spinner" id="spinner"></span><span id="statusText" aria-live="polite" data-i18n="status.idle">等待输入…</span></div>
         <div class="result-actions">
-          <button class="btn btn-secondary" id="stopBtn" disabled>停止</button>
-          <button class="btn btn-secondary" id="copyBtn" disabled>复制文本</button>
-          <button class="btn btn-secondary" id="copyMdBtn" disabled>复制 Markdown</button>
-          <button class="btn btn-secondary" id="downloadBtn" disabled>下载 .md</button>
-          <button class="btn btn-secondary" id="printBtn" disabled>打印 / PDF</button>
+          <button class="btn btn-secondary" id="stopBtn" disabled data-i18n="action.stop">停止</button>
+          <button class="btn btn-secondary" id="copyBtn" disabled data-i18n="action.copy">复制文本</button>
+          <button class="btn btn-secondary" id="copyMdBtn" disabled data-i18n="action.copyMd">复制 Markdown</button>
+          <button class="btn btn-secondary" id="downloadBtn" disabled data-i18n="action.download">下载 .md</button>
+          <button class="btn btn-secondary" id="printBtn" disabled data-i18n="action.print">打印 / PDF</button>
         </div>
       </div>
-      <div id="resultBody" class="result-body" style="margin-top:12px;" aria-live="polite">尚未生成结果。</div>
+      <div id="resultBody" class="result-body" style="margin-top:12px;" aria-live="polite" data-i18n="result.empty">尚未生成结果。</div>
     </section>
   </div>
 </div>
 
 <!-- Settings -->
-<div class="settings-overlay" id="settingsOverlay" role="dialog" aria-modal="true" aria-label="外观设置" aria-hidden="true">
+<div class="settings-overlay" id="settingsOverlay" role="dialog" aria-modal="true" aria-label="外观设置" aria-hidden="true" data-i18n-aria-label="aria.settings">
   <div class="settings">
-    <h3>外观设置</h3>
+    <h3 data-i18n="settings.title">外观设置</h3>
     <div class="group">
-      <label>主题风格</label>
+      <label data-i18n="settings.theme">主题风格</label>
       <div class="theme-options">
-        <div class="theme-card" data-theme="brand"><div class="theme-swatch" style="background:linear-gradient(135deg,#b8860b,#d4af37)"></div>金色</div>
-        <div class="theme-card" data-theme="job51"><div class="theme-swatch" style="background:linear-gradient(135deg,#a0780a,#d4af37)"></div>琥珀金</div>
-        <div class="theme-card" data-theme="dark"><div class="theme-swatch" style="background:linear-gradient(135deg,#d4af37,#f5d061)"></div>暗金</div>
+        <div class="theme-card" data-theme="brand"><div class="theme-swatch" style="background:linear-gradient(135deg,#b8860b,#d4af37)"></div><span data-i18n="theme.brand">金色</span></div>
+        <div class="theme-card" data-theme="job51"><div class="theme-swatch" style="background:linear-gradient(135deg,#a0780a,#d4af37)"></div><span data-i18n="theme.job51">琥珀金</span></div>
+        <div class="theme-card" data-theme="dark"><div class="theme-swatch" style="background:linear-gradient(135deg,#d4af37,#f5d061)"></div><span data-i18n="theme.dark">暗金</span></div>
       </div>
     </div>
     <div class="group">
-      <label>背景图案</label>
+      <label data-i18n="settings.bg">背景图案</label>
       <div class="bg-options">
-        <div class="bg-card" data-bg="none"><div class="bg-preview" style="background:#f0eadc"></div>无</div>
-        <div class="bg-card" data-bg="dots"><div class="bg-preview" style="background:radial-gradient(circle,#b8860b 1px,transparent 1px);background-size:8px 8px"></div>点阵</div>
-        <div class="bg-card" data-bg="grid"><div class="bg-preview" style="background:linear-gradient(#e2d6b0 1px,transparent 1px),linear-gradient(90deg,#e2d6b0 1px,transparent 1px);background-size:8px 8px"></div>网格</div>
-        <div class="bg-card" data-bg="image"><div class="bg-preview" style="background:url(/bg.svg);background-size:cover"></div>背景图</div>
+        <div class="bg-card" data-bg="none"><div class="bg-preview" style="background:#f0eadc"></div><span data-i18n="bg.none">无</span></div>
+        <div class="bg-card" data-bg="dots"><div class="bg-preview" style="background:radial-gradient(circle,#b8860b 1px,transparent 1px);background-size:8px 8px"></div><span data-i18n="bg.dots">点阵</span></div>
+        <div class="bg-card" data-bg="grid"><div class="bg-preview" style="background:linear-gradient(#e2d6b0 1px,transparent 1px),linear-gradient(90deg,#e2d6b0 1px,transparent 1px);background-size:8px 8px"></div><span data-i18n="bg.grid">网格</span></div>
+        <div class="bg-card" data-bg="image"><div class="bg-preview" style="background:url(/bg.svg);background-size:cover"></div><span data-i18n="bg.image">背景图</span></div>
       </div>
     </div>
     <div class="group">
-      <label>字体</label>
+      <label data-i18n="settings.font">字体</label>
       <div class="font-options">
-        <div class="font-card" data-font="default">默认</div>
-        <div class="font-card" data-font="yahei">微软雅黑</div>
-        <div class="font-card" data-font="source">思源黑体</div>
-        <div class="font-card" data-font="serif">宋体/衬线</div>
+        <div class="font-card" data-font="default" data-i18n="font.default">默认</div>
+        <div class="font-card" data-font="yahei" data-i18n="font.yahei">微软雅黑</div>
+        <div class="font-card" data-font="source" data-i18n="font.source">思源黑体</div>
+        <div class="font-card" data-font="serif" data-i18n="font.serif">宋体/衬线</div>
       </div>
     </div>
     <div class="settings-actions">
-      <button class="btn" id="saveSettings">保存</button>
-      <button class="btn btn-secondary" id="closeSettings">关闭</button>
+      <button class="btn" id="saveSettings" data-i18n="btn.save">保存</button>
+      <button class="btn btn-secondary" id="closeSettings" data-i18n="btn.close">关闭</button>
     </div>
   </div>
 </div>
@@ -386,8 +398,13 @@
 <input type="file" id="fileInput" style="display:none" accept=".txt,.md,.csv,.pdf,.docx,.png,.jpg,.jpeg,.webp,.bmp,.tiff" />
 <div class="toast" id="toast"></div>
 
+<script src="/i18n.js"></script>
 <script>
   const $ = (id) => document.getElementById(id);
+
+  /** Translation helper: falls back to the key when i18n.js is unavailable. */
+  const T = (key, vars) => (window.RI18N ? window.RI18N.t(key, vars) : key);
+  const currentLang = () => (window.RI18N && typeof window.RI18N.lang === 'string' ? window.RI18N.lang : 'zh');
 
   function showView(name) {
     document.querySelectorAll('.view').forEach((v) => v.classList.remove('active'));
@@ -425,7 +442,7 @@
   document.querySelectorAll('.theme-card').forEach((c) => c.addEventListener('click', () => { currentSettings.theme = c.dataset.theme; applySettings(currentSettings); }));
   document.querySelectorAll('.font-card').forEach((c) => c.addEventListener('click', () => { currentSettings.font = c.dataset.font; applySettings(currentSettings); }));
   document.querySelectorAll('.bg-card').forEach((c) => c.addEventListener('click', () => { currentSettings.bg = c.dataset.bg; applySettings(currentSettings); }));
-  $('saveSettings').addEventListener('click', () => { localStorage.setItem(SETTINGS_KEY, JSON.stringify(currentSettings)); $('settingsOverlay').classList.remove('on'); showToast('设置已保存'); });
+  $('saveSettings').addEventListener('click', () => { localStorage.setItem(SETTINGS_KEY, JSON.stringify(currentSettings)); $('settingsOverlay').classList.remove('on'); showToast(T('toast.saved')); });
 
   function showToast(msg) {
     const t = $('toast'); t.textContent = msg; t.classList.add('on');
@@ -455,9 +472,38 @@
     }
   };
 
+  /* English demo data mirrors EXAMPLES above; pickExample() chooses by UI language. */
+  const EXAMPLES_EN = {
+    pm: {
+      company: 'ByteDance', position: 'AI Product Manager',
+      jd: `Responsibilities:\n1. Own the roadmap for an LLM-powered AI product and drive it from 0 to 1.\n2. Turn user research into requirements and interaction flows; write PRDs.\n3. Work with algorithm, engineering and design teams to ship on schedule.\n4. Track product metrics and iterate to improve user experience and business value.\n5. Track the market and competitors, and propose new product directions.\n\nRequirements:\n1. Bachelor degree or above; computer science or product background preferred.\n2. 3+ years of product experience; AI/LLM products preferred.\n3. Familiar with RAG, agents and prompt engineering.\n4. Data-driven, comfortable with SQL and analysis.\n5. Strong communication, collaboration and project management.`,
+      resume: `Alex Chen | M | 1998 | BSc | 3 years experience\nTarget role: Product Manager\nPhone: 138xxxx | Email: xxx@xx.com\n\nEducation\nXX University, Computer Science, BSc, 2016-2020\n\nExperience\nABC Tech, Product Manager, Jul 2020 - Jun 2023\n- Collected requirements and wrote PRDs for the company SaaS product\n- Worked with engineering to ship features\n- Ran user research and basic data analysis\n\nProjects\nSmart customer-support system\n- Contributed to the AI support product design\n- Used an LLM for question answering\n\nSkills\nPython, SQL, Axure, Figma`
+    },
+    data: {
+      company: 'Tencent', position: 'Data Analyst',
+      jd: `Responsibilities:\n1. Analyse business data and deliver reports and insights.\n2. Build metric systems and monitoring dashboards.\n3. Support product and operations decisions; design A/B tests.\n4. Contribute to the data platform and data governance.\n\nRequirements:\n1. Statistics, maths or computer science background.\n2. Strong SQL and Python; comfortable with data visualisation.\n3. Experience designing A/B tests.\n4. Good business sense and communication.`,
+      resume: `Lily Li | F | 25\nTarget role: Data Analyst\n\nEducation: XX University, Statistics, MSc, 2021-2024\n\nInternship: Internet company, Data Analyst Intern, Jun 2023 - Dec 2023\n- Built recurring data reports\n- Queried data with SQL\n- Contributed to user behaviour analysis\n\nSkills: SQL, Python, Tableau`
+    },
+    tech: {
+      company: 'Acme Internet', position: 'Backend Engineer',
+      jd: `Responsibilities:\n1. Design and build backend services for core business systems, keeping them highly available and fast.\n2. Evolve the system architecture; optimise API performance and database access.\n3. Write technical documentation, review code and share knowledge.\n\nRequirements:\n1. Computer science background, bachelor degree or above.\n2. Proficient in Java/Go/C++; familiar with MySQL, Redis and message queues.\n3. Experience with high concurrency and distributed systems preferred.\n4. Comfortable on Linux and with common debugging tools.`,
+      resume: `Wei Wang | M | BSc | 2 years experience\nTarget role: Backend Engineer\n\nEducation: XX University, Software Engineering, BSc, 2018-2022\n\nExperience\nTech company, Backend Developer, Jul 2022 - Jun 2024\n- Built APIs for the order system\n- Stored data in MySQL and cached with Redis\n- Fixed production issues\n\nProjects\nOrder service refactor\n- Split part of the service into modules\n- Improved API response time slightly\n\nSkills: Java, MySQL, Redis, Git`
+    },
+    ops: {
+      company: 'An education company', position: 'User Operations',
+      jd: `Responsibilities:\n1. Own the user lifecycle: acquisition, activation and retention strategies.\n2. Plan and run community programmes and campaigns to lift conversion and repeat purchase.\n3. Build user segments and metrics; deliver operations reports.\n\nRequirements:\n1. Bachelor degree or above; 1-3 years of user or community operations experience.\n2. Comfortable with data; able to run campaign reviews independently.\n3. Strong writing and communication; zero-to-one community experience preferred.`,
+      resume: `Na Zhao | F | BSc | 2 years experience\nTarget role: User Operations\n\nEducation: XX University, Marketing, BSc, 2018-2022\n\nExperience\nEducation company, Operations Specialist, Jul 2022 - Jun 2024\n- Maintained community channels: announcements and Q&A\n- Ran two check-in campaigns\n- Collected campaign metrics and wrote summaries\n\nSkills: Excel, WeChat Official Accounts, community operations`
+    }
+  };
+
+  function pickExample(key) {
+    const table = currentLang() === 'en' ? EXAMPLES_EN : EXAMPLES;
+    return table[key] || EXAMPLES[key];
+  }
+
   document.querySelectorAll('.chip').forEach((c) => {
     c.addEventListener('click', () => {
-      const ex = EXAMPLES[c.dataset.example];
+      const ex = pickExample(c.dataset.example);
       if (!ex) return;
       $('company').value = ex.company;
       $('position').value = ex.position;
@@ -467,7 +513,7 @@
   });
 
   function loadExampleAndGo() {
-    const ex = EXAMPLES.pm;
+    const ex = pickExample('pm');
     $('company').value = ex.company;
     $('position').value = ex.position;
     $('jd').value = ex.jd;
@@ -479,10 +525,10 @@
     try {
       const r = await fetch('/api/health');
       const j = await r.json();
-      $('health').textContent = j.hasKey ? `● ${j.model} 已就绪` : '● 未配置 API Key';
+      $('health').textContent = j.hasKey ? T('health.ready', { model: j.model }) : T('health.noKey');
       $('health').style.color = j.hasKey ? 'var(--ok)' : 'var(--warn)';
     } catch (e) {
-      $('health').textContent = '● 服务未启动';
+      $('health').textContent = T('health.down');
       $('health').style.color = 'var(--danger)';
     }
   }
@@ -535,24 +581,14 @@
     overlay.setAttribute('aria-hidden', 'true');
   }
 
-  // ===== Error mapping =====
-  const ERROR_TEXT = {
-    NO_API_KEY: '服务端未配置 API Key（.env 中的 LLM_API_KEY）',
-    UPSTREAM_TIMEOUT: '模型响应超时，请重试或换一个模型',
-    UPSTREAM_RATE_LIMITED: '请求过于频繁，请稍后重试',
-    UPSTREAM_ERROR: '模型服务出错，请检查 API Key 或余额',
-    UPSTREAM_NETWORK: '无法连接模型服务，请检查网络 / LLM_API_BASE',
-    UPSTREAM_INVALID: '模型返回格式异常，请重试',
-    BODY_TOO_LARGE: '内容过大，请精简后重试',
-    FILE_TOO_LARGE: '文件超过大小上限',
-    UNSUPPORTED_TYPE: '不支持的文件类型',
-    EXTRACTOR_UNAVAILABLE: '服务端缺少对应解析依赖，请先 npm install',
-    EXTRACT_EMPTY: '没有从文件中提取到文本，可能是扫描件或空文件',
-    TEXT_TOO_LONG: '文本超过长度上限，请精简后重试',
-    INVALID_REQUEST: '请求参数不完整',
-  };
+  // ===== Error mapping (localised through i18n.js) =====
   function errorTextOf(code, message) {
-    return ERROR_TEXT[code] || message || '未知错误';
+    if (code) {
+      const key = 'err.' + code;
+      const text = T(key);
+      if (text && text !== key) return text;
+    }
+    return message || T('err.unknown');
   }
   function readApiError(payload, response) {
     const code = payload && payload.code;
@@ -578,18 +614,17 @@
   async function extractFile(file, targetId) {
     if (!file) return;
     if (file.size > MAX_UPLOAD_MB * 1024 * 1024) {
-      showToast(`文件超过 ${MAX_UPLOAD_MB}MB，请拆分或改为粘贴`);
+      showToast(T('toast.uploadTooBig', { mb: MAX_UPLOAD_MB }));
       return;
     }
     const btn = document.querySelector(`.upload-btn[data-target="${targetId}"]`);
-    const label = btn ? btn.textContent : '';
-    if (btn) { btn.disabled = true; btn.textContent = '解析中…'; }
-    showToast('正在提取文本…');
+    if (btn) { btn.disabled = true; btn.textContent = T('upload.parsing'); }
+    showToast(T('toast.extracting'));
     try {
       const dataUrl = await new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.onload = () => resolve(String(reader.result));
-        reader.onerror = () => reject(new Error('读取文件失败'));
+        reader.onerror = () => reject(new Error(T('toast.fileReadFailed')));
         reader.readAsDataURL(file);
       });
       const r = await fetch('/api/extract', {
@@ -601,11 +636,16 @@
       if (!r.ok) throw readApiError(payload, r);
       appendExtractedText(targetId, payload.text);
       const chars = payload.meta ? payload.meta.chars : payload.text.length;
-      showToast(`已提取 ${chars} 字`);
+      showToast(T('toast.extracted', { chars }));
     } catch (err) {
-      showToast('提取失败：' + err.message);
+      showToast(T('toast.extractFailed', { msg: err.message }));
     } finally {
-      if (btn) { btn.disabled = false; btn.textContent = label; }
+      if (btn) {
+        btn.disabled = false;
+        // Restore the localised label (handles a language switch during parsing).
+        if (window.RI18N) window.RI18N.translateElement(btn);
+        else btn.textContent = '📎 上传文件';
+      }
     }
   }
 
@@ -737,17 +777,30 @@
       document.body.appendChild(ta);
       ta.select();
       try { document.execCommand('copy'); showToast(okMessage); }
-      catch (err) { showToast('复制失败，请手动选择文本'); }
+      catch (err) { showToast(T('toast.copyFailed')); }
       finally { document.body.removeChild(ta); }
     }
+  }
+
+  // ===== Status line (localised, survives a language switch) =====
+  let statusState = { key: 'status.idle', vars: null, suffix: '' };
+
+  function setStatus(key, vars, suffix) {
+    statusState = { key, vars: vars || null, suffix: suffix || '' };
+    $('statusText').textContent = T(key, vars) + statusState.suffix;
+  }
+
+  function detailSuffix(parts) {
+    const kept = parts.filter((p) => p);
+    return kept.length ? ' · ' + kept.join(' · ') : '';
   }
 
   async function runOptimize() {
     const jd = $('jd').value.trim();
     const resume = $('resume').value.trim();
     if (!jd || !resume) {
-      $('statusText').textContent = '请填写 JD 和简历';
-      showToast('请先填写 JD 和简历');
+      setStatus('status.needInput');
+      showToast(T('toast.needInput'));
       return;
     }
     currentMarkdown = '';
@@ -758,7 +811,7 @@
     $('stopBtn').disabled = false;
     setResultActions(false);
     $('spinner').classList.add('on');
-    $('statusText').textContent = 'AI 正在生成，输出会实时显示…';
+    setStatus('status.generating');
     streamController = new AbortController();
     const started = Date.now();
     try {
@@ -772,6 +825,7 @@
           resume,
           model: $('model').value,
           roleType: $('roleType').value,
+          lang: currentLang(),
           stream: true,
         }),
         signal: streamController.signal,
@@ -786,25 +840,26 @@
         if (!payload.ok) throw readApiError(payload, response);
         currentMarkdown = payload.content || '';
         finishResult();
-        const tokens = payload.usage && payload.usage.total_tokens ? ` · ${payload.usage.total_tokens} tokens` : '';
-        $('statusText').textContent = `完成 · ${payload.model}${tokens}`;
+        const tokens = payload.usage && payload.usage.total_tokens ? `${payload.usage.total_tokens} tokens` : '';
+        setStatus('status.done', null, detailSuffix([payload.model, tokens]));
       } else {
         const result = await readStream(response);
         finishResult();
         const seconds = ((Date.now() - started) / 1000).toFixed(1);
-        const tokens = result.usage && result.usage.total_tokens ? ` · ${result.usage.total_tokens} tokens` : '';
-        $('statusText').textContent = `完成 · ${(result.meta && result.meta.model) || $('model').value}${tokens} · ${seconds}s`;
+        const tokens = result.usage && result.usage.total_tokens ? `${result.usage.total_tokens} tokens` : '';
+        const model = (result.meta && result.meta.model) || $('model').value;
+        setStatus('status.done', null, detailSuffix([model, tokens, `${seconds}s`]));
       }
       window.__lastResult = currentMarkdown;
       setResultActions(Boolean(currentMarkdown));
-      showToast('优化完成');
+      showToast(T('toast.completed'));
     } catch (err) {
       finishResult();
       if (err.name === 'AbortError') {
-        $('statusText').textContent = currentMarkdown ? '已停止（保留已生成部分）' : '已停止生成';
-        showToast('已停止生成');
+        setStatus(currentMarkdown ? 'status.stopped.keep' : 'status.stopped.empty');
+        showToast(T('toast.stopped'));
       } else {
-        $('statusText').textContent = '失败';
+        setStatus('status.failed');
         $('resultBody').innerHTML = `<div class="error-box">${escapeHtml(err.message)}</div>`;
         window.__lastResult = currentMarkdown;
       }
@@ -822,17 +877,17 @@
   $('stopBtn').addEventListener('click', () => { if (streamController) streamController.abort(); });
 
   $('copyBtn').addEventListener('click', () => {
-    copyText(plainTextOf(window.__lastResult || currentMarkdown), '已复制纯文本');
+    copyText(plainTextOf(window.__lastResult || currentMarkdown), T('toast.copyText'));
   });
   $('copyMdBtn').addEventListener('click', () => {
-    copyText(window.__lastResult || currentMarkdown, '已复制 Markdown');
+    copyText(window.__lastResult || currentMarkdown, T('toast.copyMd'));
   });
   $('downloadBtn').addEventListener('click', () => {
     const text = window.__lastResult || currentMarkdown;
     if (!text) return;
-    const company = $('company').value.trim() || '公司';
-    const position = $('position').value.trim() || '岗位';
-    const safeName = `${company}-${position}-简历优化`.replace(/[\\/:*?"<>|]/g, '_');
+    const company = $('company').value.trim() || T('file.companyFallback');
+    const position = $('position').value.trim() || T('file.positionFallback');
+    const safeName = `${company}-${position}-${T('file.suffix')}`.replace(/[\\/:*?"<>|]/g, '_');
     const blob = new Blob([text], { type: 'text/markdown;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -842,9 +897,21 @@
     a.click();
     document.body.removeChild(a);
     setTimeout(() => URL.revokeObjectURL(url), 1000);
-    showToast('已下载 Markdown 文件');
+    showToast(T('toast.downloaded'));
   });
   $('printBtn').addEventListener('click', () => window.print());
+
+  // ===== Language switching =====
+  document.querySelectorAll('.lang-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      if (window.RI18N) window.RI18N.setLang(btn.dataset.lang);
+    });
+  });
+
+  document.addEventListener('ri18n:change', () => {
+    $('statusText').textContent = T(statusState.key, statusState.vars) + statusState.suffix;
+    checkHealth();
+  });
 
   document.addEventListener('keydown', (e) => {
     const optimizerActive = document.getElementById('view-optimizer').classList.contains('active');

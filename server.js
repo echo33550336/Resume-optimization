@@ -16,7 +16,7 @@
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
-const { buildMessages, ROLE_TYPES } = require('./prompt');
+const { buildMessages, ROLE_TYPES, LANGS, normalizeLang } = require('./prompt');
 
 // ---------------------------------------------------------------------------
 // Environment
@@ -461,6 +461,7 @@ async function handleHealth(req, res) {
     hasKey: Boolean(LLM_API_KEY),
     streaming: true,
     roleTypes: ROLE_TYPES,
+    langs: LANGS,
     extractors: {
       pdf: Boolean(extractors.pdf),
       docx: Boolean(extractors.docx),
@@ -571,11 +572,12 @@ function normalizeOptimizeInput(body) {
   const company = typeof body.company === 'string' ? body.company.trim().slice(0, 120) : '';
   const position = typeof body.position === 'string' ? body.position.trim().slice(0, 120) : '';
   const roleType = ROLE_TYPES.includes(body.roleType) ? body.roleType : 'general';
+  const lang = normalizeLang(typeof body.lang === 'string' ? body.lang.trim().toLowerCase() : '');
   const model =
     typeof body.model === 'string' && body.model.trim().length > 0 && body.model.trim().length <= 120
       ? body.model.trim()
       : LLM_MODEL;
-  return { company, position, jd, resume, roleType, model };
+  return { company, position, jd, resume, roleType, lang, model };
 }
 
 async function handleOptimize(req, res) {
@@ -599,6 +601,7 @@ async function handleOptimize(req, res) {
       ok: true,
       content,
       model: input.model,
+      lang: input.lang,
       usage,
       elapsedMs: Date.now() - started,
     });
@@ -629,7 +632,12 @@ async function handleOptimize(req, res) {
     closed = true;
   });
 
-  sendEvent('meta', { model: input.model, roleType: input.roleType, startedAt: new Date().toISOString() });
+  sendEvent('meta', {
+    model: input.model,
+    roleType: input.roleType,
+    lang: input.lang,
+    startedAt: new Date().toISOString(),
+  });
 
   // Heartbeat keeps proxies / browsers from timing the connection out.
   const heartbeat = setInterval(() => {
