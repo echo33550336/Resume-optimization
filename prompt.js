@@ -188,7 +188,7 @@ function buildUserPrompt({ company, position, jd, resume, roleType, lang }) {
   ].join('\n');
 }
 
-/** Convenience: build the full OpenAI-compatible messages array. */
+/** Convenience: build the full chat-completions `messages` array (OpenAI wire format only). */
 function buildMessages(input) {
   const lang = normalizeLang(input && input.lang);
   return [

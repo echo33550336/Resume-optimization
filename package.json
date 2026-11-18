@@ -1,7 +1,7 @@
 {
   "name": "resume-optimizer",
   "version": "1.4.0",
-  "description": "Tailor a resume to a job description with a streaming, fully local LLM optimizer, bilingual UI and an independent report language",
+  "description": "Self-hosted resume optimizer that streams rewrites from any endpoint speaking the OpenAI chat-completions protocol (Tencent Hunyuan by default); bilingual UI, independent report language",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

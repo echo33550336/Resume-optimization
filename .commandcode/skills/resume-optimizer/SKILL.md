@@ -8,8 +8,8 @@ metadata:
   version: "1.3.0"
   category: productivity
 external_urls:
-  - "User-configured OpenAI-compatible LLM endpoint (e.g. https://api.openai.com, https://tokenhub.tencentmaas.com)"
-compatibility: "Requires an OpenAI-compatible LLM endpoint and API key provided by the user."
+  - "User-configured LLM endpoint speaking the OpenAI chat-completions protocol (e.g. https://tokenhub.tencentmaas.com; OpenAI itself is optional, never implied)"
+compatibility: "Requires an endpoint that speaks the OpenAI chat-completions wire protocol, plus an API key the user provides. The protocol name does not mean OpenAI models are used: the default endpoint/model is Tencent Hunyuan."
 ---
 
 # Resume Optimizer
@@ -84,7 +84,7 @@ Use this system prompt verbatim when calling the LLM:
    - DOCX → extract raw text (mammoth).
    - Image (PNG/JPG/...) → OCR with tesseract (chi_sim + eng).
 2. Build the user prompt from the template; keep the system prompt fixed.
-3. Call the LLM (OpenAI-compatible chat/completions) with temperature ~0.7 and enough max_tokens (4096+).
+3. Call the LLM (POST `{LLM_API_BASE}/chat/completions`, i.e. the OpenAI wire format) with temperature ~0.7 and enough max_tokens (4096+).
 4. Render the result as Markdown: diagnosis → optimized resume → change notes → risk tips.
 5. Offer to copy the optimized resume or iterate on a specific section.
 
@@ -101,7 +101,8 @@ Use this system prompt verbatim when calling the LLM:
 The repo ships a Node.js web app (`server.js` + `prompt.js` + `public/index.html`) that implements
 this workflow with a UI: landing page, optimizer form with drag-and-drop upload, streaming Markdown
 output with stop/copy/download/print, theme/font/background switcher. Run with `npm start`
-(default `http://127.0.0.1:3000`). Configure the LLM via `.env` (OpenAI-compatible endpoint).
+(default `http://127.0.0.1:3000`). Configure the LLM via `.env` (any endpoint speaking the OpenAI
+chat-completions protocol; the default is Tencent Hunyuan, not OpenAI).
 
 The server also accepts `roleType` (tech/product/data/ops/design/marketing/general) and appends the
 matching focus hints from `prompt.js`; keep that behaviour when reusing this skill outside the app.

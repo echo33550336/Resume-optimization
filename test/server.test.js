@@ -22,7 +22,7 @@ function closeServer(server) {
 }
 
 /**
- * Minimal OpenAI-compatible mock: it echoes back the report language it detected
+ * Minimal chat-completions mock (OpenAI wire format): it echoes back the report language it detected
  * from the system prompt, so the test can assert that `outputLang` reached the model.
  */
 function startMockLlm() {

@@ -1,12 +1,13 @@
 # Resume Optimizer
 
-> Tailor a resume to a specific job description with an LLM that behaves like a hiring manager — streamed live, fully local, zero frameworks.
+> Tailor a resume to a specific job description with an LLM that behaves like a hiring manager — streamed live, self-hosted, zero frameworks. The model is the endpoint you configure (Tencent Hunyuan by default); "OpenAI-compatible" here names the API shape, not OpenAI the vendor.
 
 [![Node](https://img.shields.io/badge/node-%3E%3D18-brightgreen)](https://nodejs.org)
 [![CI](https://github.com/echo33550336/Resume-optimization/actions/workflows/ci.yml/badge.svg)](https://github.com/echo33550336/Resume-optimization/actions/workflows/ci.yml)
 [![Docker](https://img.shields.io/badge/docker-ready-2496ED?logo=docker&logoColor=white)](./Dockerfile)
 [![License](https://img.shields.io/badge/license-MIT-blue)](./LICENSE)
 [![Backend](https://img.shields.io/badge/backend-zero--framework-black)](server.js)
+[![Model](https://img.shields.io/badge/model-bring--your--own-informational)](#which-model-does-it-use)
 [![Streaming](https://img.shields.io/badge/output-SSE-purple)](#features)
 
 ---
@@ -30,6 +31,22 @@ instead of a spinner and a wait.
 It is a single small Node.js service with a static single-page UI: no build step, no database, no
 telemetry, no third-party proxy. The browser never sees the API key; the server is the only
 component that talks to the LLM you configure.
+
+## Which model does it use?
+
+**Whatever chat endpoint you configure — Tencent Hunyuan by default. This repository ships no model
+weights, no OpenAI SDK, and no OpenAI account; it calls OpenAI only if you point it there yourself.**
+
+The word _OpenAI-compatible_ appears in this README because it is the name of a **wire format**, not
+a vendor:
+
+- `POST {LLM_API_BASE}/chat/completions` with `Authorization: Bearer <key>`
+- request body `{ model, messages, temperature, max_tokens, stream }`
+- non-streaming response `choices[0].message.content`; streaming response SSE `data: {...}` frames
+
+That shape was popularised by OpenAI and is now implemented by nearly every provider, so one code
+path reaches all of them. What the model actually is, is decided by `LLM_API_BASE` + `LLM_MODEL` in
+`.env` — nothing in the source code is vendor-specific.
 
 ## Features
 
@@ -60,29 +77,29 @@ component that talks to the LLM you configure.
                                                         │ POST /chat/completions
                                                         ▼
                                                ┌──────────────────┐
-                                               │ OpenAI-compatible│
-                                               │ LLM endpoint     │
+                                               │ chat-completions │
+                                               │ endpoint         │
                                                └──────────────────┘
 ```
 
 1. The UI posts `{ company, position, jd, resume, roleType, lang }`.
 2. `prompt.js` assembles the system prompt (HR-director persona plus family-specific focus) and the user prompt, in the requested language.
-3. `server.js` calls any OpenAI-compatible `/chat/completions` endpoint, retrying only before the first delta reaches the browser.
+3. `server.js` calls `POST {LLM_API_BASE}/chat/completions` — the OpenAI _wire format_, spoken by the configured provider (Hunyuan by default) — retrying only before the first delta reaches the browser.
 4. Tokens are relayed as SSE frames; the UI renders Markdown incrementally and keeps the raw text for export.
 
 ## Tech stack
 
-| Layer      | Choice                                                                          |
-| ---------- | ------------------------------------------------------------------------------- |
-| Server     | Node.js native `http` — no framework, no router dependency                      |
-| Frontend   | Hand-written HTML / CSS / JS — no bundler, no build step                        |
-| LLM        | Any OpenAI-compatible `/chat/completions` endpoint (Tencent Hunyuan by default) |
-| Extractors | `pdf-parse`, `mammoth`, `tesseract.js` — optional and lazily required           |
-| Prompts    | `prompt.js` — single source of truth, shared with the Agent Skill               |
-| Types      | TypeScript in `checkJs` mode over JSDoc — no transpile step                     |
-| Quality    | ESLint (flat config), Prettier, `node:test` unit + HTTP integration tests       |
-| CI / CD    | GitHub Actions: Node 18/20/22 matrix, lint/format/type/test gates, Docker build |
-| Runtime    | Still zero production dependencies beyond the three extractors                  |
+| Layer      | Choice                                                                                                                           |
+| ---------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| Server     | Node.js native `http` — no framework, no router dependency                                                                       |
+| Frontend   | Hand-written HTML / CSS / JS — no bundler, no build step                                                                         |
+| LLM        | Any endpoint speaking the OpenAI chat-completions protocol (Tencent Hunyuan by default; OpenAI models are optional, not implied) |
+| Extractors | `pdf-parse`, `mammoth`, `tesseract.js` — optional and lazily required                                                            |
+| Prompts    | `prompt.js` — single source of truth, shared with the Agent Skill                                                                |
+| Types      | TypeScript in `checkJs` mode over JSDoc — no transpile step                                                                      |
+| Quality    | ESLint (flat config), Prettier, `node:test` unit + HTTP integration tests                                                        |
+| CI / CD    | GitHub Actions: Node 18/20/22 matrix, lint/format/type/test gates, Docker build                                                  |
+| Runtime    | Still zero production dependencies beyond the three extractors                                                                   |
 
 ## Project structure
 
@@ -134,30 +151,37 @@ Without `npm install` the app still runs: text pasting works, uploads answer wit
 
 ### Minimal `.env`
 
+The defaults already target Tencent Hunyuan, so a key is all you need in the common case. The
+values below are **placeholders for the protocol** — the OpenAI block is an optional example, not
+the default and not a requirement:
+
 ```dotenv
-LLM_API_KEY=sk-your-key
-LLM_API_BASE=https://api.openai.com/v1
-LLM_MODEL=gpt-4o-mini
+LLM_API_KEY=your-key
+LLM_API_BASE=https://tokenhub.tencentmaas.com/v1                       # default (Tencent Hunyuan)
+LLM_MODEL=hunyuan-2.0-instruct-20251111                               # default model
+# Optional, only if you want OpenAI models:
+# LLM_API_BASE=https://api.openai.com/v1
+# LLM_MODEL=gpt-4o-mini
 ```
 
 ## Configuration
 
 Every setting can come from `.env` or from real environment variables (real environment wins):
 
-| Variable            | Default                               | Meaning                                                              |
-| ------------------- | ------------------------------------- | -------------------------------------------------------------------- |
-| `LLM_API_KEY`       | —                                     | Bearer token for the endpoint (**required**)                         |
-| `LLM_API_BASE`      | `https://tokenhub.tencentmaas.com/v1` | OpenAI-compatible base URL                                           |
-| `LLM_MODEL`         | `hunyuan-2.0-instruct-20251111`       | Default model                                                        |
-| `LLM_MAX_TOKENS`    | `4096`                                | Max output tokens                                                    |
-| `LLM_TIMEOUT_MS`    | `120000`                              | Per-attempt timeout (minimum 5000)                                   |
-| `LLM_RETRIES`       | `2`                                   | Retries on 429 / 5xx / network failure, before any token is streamed |
-| `PORT`              | `3000`                                | Listen port                                                          |
-| `HOST`              | `127.0.0.1`                           | Listen host — keep loopback unless you know why                      |
-| `MAX_BODY_BYTES`    | `20971520` (20 MB)                    | Max JSON request body                                                |
-| `MAX_EXTRACT_BYTES` | `20971520` (20 MB)                    | Max uploaded file size                                               |
-| `MAX_TEXT_CHARS`    | `60000`                               | Max characters for JD / resume / extracted text                      |
-| `ALLOWED_ORIGINS`   | —                                     | Extra CORS origins, comma separated (localhost is always allowed)    |
+| Variable            | Default                               | Meaning                                                                         |
+| ------------------- | ------------------------------------- | ------------------------------------------------------------------------------- |
+| `LLM_API_KEY`       | —                                     | Bearer token for the endpoint (**required**)                                    |
+| `LLM_API_BASE`      | `https://tokenhub.tencentmaas.com/v1` | Base URL speaking the OpenAI chat-completions protocol (a format, not a vendor) |
+| `LLM_MODEL`         | `hunyuan-2.0-instruct-20251111`       | Default model                                                                   |
+| `LLM_MAX_TOKENS`    | `4096`                                | Max output tokens                                                               |
+| `LLM_TIMEOUT_MS`    | `120000`                              | Per-attempt timeout (minimum 5000)                                              |
+| `LLM_RETRIES`       | `2`                                   | Retries on 429 / 5xx / network failure, before any token is streamed            |
+| `PORT`              | `3000`                                | Listen port                                                                     |
+| `HOST`              | `127.0.0.1`                           | Listen host — keep loopback unless you know why                                 |
+| `MAX_BODY_BYTES`    | `20971520` (20 MB)                    | Max JSON request body                                                           |
+| `MAX_EXTRACT_BYTES` | `20971520` (20 MB)                    | Max uploaded file size                                                          |
+| `MAX_TEXT_CHARS`    | `60000`                               | Max characters for JD / resume / extracted text                                 |
+| `ALLOWED_ORIGINS`   | —                                     | Extra CORS origins, comma separated (localhost is always allowed)               |
 
 ## Usage
 
