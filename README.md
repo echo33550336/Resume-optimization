@@ -2,6 +2,8 @@
 
 > Tailor a resume to a specific job description with an LLM that behaves like a hiring manager — streamed live, self-hosted, zero frameworks. The model is the endpoint you configure (Tencent Hunyuan by default); "OpenAI-compatible" here names the API shape, not OpenAI the vendor.
 
+**English** | [中文](README.zh-CN.md)
+
 [![Node](https://img.shields.io/badge/node-%3E%3D18-brightgreen)](https://nodejs.org)
 [![CI](https://github.com/echo33550336/Resume-optimization/actions/workflows/ci.yml/badge.svg)](https://github.com/echo33550336/Resume-optimization/actions/workflows/ci.yml)
 [![Docker](https://img.shields.io/badge/docker-ready-2496ED?logo=docker&logoColor=white)](./Dockerfile)
@@ -316,6 +318,17 @@ stream has started arrive as `event: error` frames; failures before it arrive as
 - Optional extractors pull native/heavy dependencies (`tesseract.js` downloads language data on first OCR). Install them only if you need file uploads.
 
 ### Docker
+
+Pull the prebuilt image from GHCR (published on every `v*` tag by
+[`docker-publish.yml`](./.github/workflows/docker-publish.yml)):
+
+```bash
+cp .env.example .env      # then fill LLM_API_KEY / LLM_API_BASE / LLM_MODEL
+docker run --rm -p 127.0.0.1:3000:3000 --env-file .env \
+  ghcr.io/echo33550336/resume-optimization:latest
+```
+
+Or build it yourself with Compose:
 
 ```bash
 cp .env.example .env      # then fill LLM_API_KEY / LLM_API_BASE / LLM_MODEL
