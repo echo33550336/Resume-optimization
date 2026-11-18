@@ -103,6 +103,7 @@
     'label.resume': 'Resume',
     'label.roleType': 'Job family',
     'label.model': 'Model',
+    'label.outputLang': 'Report language',
     'label.action': 'Action',
     'placeholder.company': 'e.g. Acme Corp',
     'placeholder.position': 'e.g. Senior Backend Engineer',
@@ -124,6 +125,9 @@
     'role.marketing': 'Marketing',
     'model.hunyuan': 'Hunyuan 2.0 Instruct (recommended)',
     'model.thinking': 'Hunyuan 2.0 Thinking',
+    'output.auto': 'Follow interface',
+    'output.zh': 'Chinese',
+    'output.en': 'English',
     'btn.optimize': 'Optimize resume',
 
     // result

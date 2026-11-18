@@ -14,6 +14,7 @@
 
 /** Ordered list of supported UI languages. Keep in sync with public/i18n.js. */
 const LANGS = ['zh', 'en'];
+const OUTPUT_LANGS = ['auto', 'zh', 'en'];
 
 /** Ordered list of supported job types. Keep in sync with public/index.html. */
 const ROLE_TYPES = ['general', 'tech', 'product', 'data', 'ops', 'design', 'marketing'];
@@ -114,7 +115,18 @@ const SYSTEM_PROMPT = SYSTEM_PROMPTS.zh;
 
 /** Normalise unknown / missing languages to a supported code. */
 function normalizeLang(lang) {
-  return LANGS.includes(lang) ? lang : 'zh';
+  const value = typeof lang === 'string' ? lang.trim().toLowerCase() : '';
+  return LANGS.includes(value) ? value : 'zh';
+}
+
+/**
+ * Resolve the language the report should be written in.
+ * `auto` (or a missing / unknown value) follows the UI language.
+ */
+function normalizeOutputLang(value, uiLang) {
+  const v = typeof value === 'string' ? value.trim().toLowerCase() : '';
+  if (v === 'zh' || v === 'en') return v;
+  return normalizeLang(uiLang);
 }
 
 /**
@@ -187,12 +199,14 @@ function buildMessages(input) {
 
 module.exports = {
   LANGS,
+  OUTPUT_LANGS,
   ROLE_TYPES,
   ROLE_LABELS,
   ROLE_FOCUS,
   SYSTEM_PROMPT,
   SYSTEM_PROMPTS,
   normalizeLang,
+  normalizeOutputLang,
   buildSystemPrompt,
   buildUserPrompt,
   buildMessages,

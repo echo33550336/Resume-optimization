@@ -5,7 +5,7 @@ argument-hint: "<company> <position> --jd <jd text or file> --resume <resume tex
 license: MIT
 metadata:
   author: echo33550336
-  version: "1.2.0"
+  version: "1.3.0"
   category: productivity
 external_urls:
   - "User-configured OpenAI-compatible LLM endpoint (e.g. https://api.openai.com, https://tokenhub.tencentmaas.com)"
@@ -32,7 +32,7 @@ Collect these before running:
 2. **Job type** — one of: tech, product, data, ops, design, marketing, general. Adjusts optimization focus.
 3. **Job description (JD)** — full text. Accept pasted text or extracted from a file (PDF/DOCX/TXT/image via OCR).
 4. **Resume** — full text. Accept pasted text or extracted from a file.
-5. **Language** — `zh` or `en` (default `zh`). Controls both the prompt copy and the language of the report; the web app sends the language currently selected in the UI switch.
+5. **Report language** — `zh` or `en` (default: follow the interface language). Controls both the prompt copy and the language of the report; it is independent from the UI language (the web app sends `lang` for the UI and `outputLang` for the report, `auto` = follow the UI).
 
 If any input is missing, ask the user. Do not fabricate resume content.
 
@@ -40,7 +40,7 @@ If any input is missing, ask the user. Do not fabricate resume content.
 
 > **Source of truth:** the canonical prompt lives in [`prompt.js`](../../../prompt.js)
 > (`SYSTEM_PROMPTS.zh` / `SYSTEM_PROMPTS.en`, `ROLE_FOCUS`, `buildSystemPrompt()`, `buildUserPrompt()`,
-> `normalizeLang()`). The web app imports it directly; the copy below is for skill-only/agent usage.
+> `normalizeLang()`, `normalizeOutputLang()`). The web app imports it directly; the copy below is for skill-only/agent usage.
 > If you change one, change both — but prefer keeping `prompt.js` authoritative.
 
 Use this system prompt verbatim when calling the LLM:

@@ -36,7 +36,8 @@ component that talks to the LLM you configure.
 - **Cancel and export** — stop generation, copy plain text, copy Markdown, download `.md`, or print / save as PDF.
 - **Multi-format input** — paste text or drop PDF / DOCX / TXT / MD / CSV / images (OCR) onto the JD or resume box.
 - **Job-family focus** — tech, product, data, ops, design, marketing, general: each carries its own optimization bias.
-- **Bilingual UI (Chinese / English)** — one click switches every label and the language the model writes in; the choice is remembered in `localStorage`.
+- **Bilingual UI (Chinese / English)** — one click switches every label; the choice is remembered in `localStorage`.
+- **Report language is independent** — the model can answer in Chinese or English regardless of the interface language (`Follow interface` / `Chinese` / `English`).
 - **Theme system** — brand gold / amber / dark, four fonts, four background patterns, persisted in `localStorage`.
 - **Local-first and private** — nothing leaves your machine except the request to the LLM endpoint you configured.
 - **Hardened server** — LLM timeout with bounded retries, typed error codes, body/upload/text limits, localhost-only CORS, static path containment, security headers, graceful shutdown.
@@ -145,7 +146,8 @@ Every setting can come from `.env` or from real environment variables (real envi
 
 1. Open `http://127.0.0.1:3000` and click **Optimize resume**.
 2. Fill in company and position, paste the JD and your resume — or drag a file onto either box.
-3. Pick a job family (it changes what the model emphasises) and a model.
+3. Pick a job family (it changes what the model emphasises), a model, and the **report language**
+   (`Follow interface` keeps it in sync with the Chinese / EN switch).
 4. Press **Optimize**. The report streams in; **Stop** cancels, the toolbar offers copy as text, copy as Markdown, download `.md`, and print.
 5. Prefer a different light? **Settings** switches theme, font, and background; choices persist locally.
 
@@ -154,9 +156,9 @@ Keyboard: `Ctrl/Cmd + Enter` submits, `Esc` closes the settings dialog.
 ### Internationalization
 
 The `ZH / EN` switch in the header translates the whole interface (landing page, forms, result
-toolbar, settings, toasts, error messages) and sends `lang` with the request so the model writes its
-answer in the same language. English was the original UI language and Chinese came second, so the
-Chinese strings live in dictionaries while the English ones are the shipped markup.
+toolbar, settings, toasts, error messages). The **Report language** dropdown next to the model picker
+is independent: `Follow interface`, `Chinese` or `English`, and it is what `lang`/`outputLang` carry
+to the server — so an English-speaking user can ask for a Chinese resume report, and vice versa.
 
 - Dictionaries: `public/i18n.js` (`EN`, `ZH`, one key per string, `{name}` interpolation).
 - Markup carries `data-i18n`, `data-i18n-placeholder`, `data-i18n-title`, `data-i18n-aria-label`, `data-i18n-alt`.
@@ -177,6 +179,7 @@ All JSON endpoints answer `{ "ok": true, ... }` on success and `{ "ok": false, "
   "streaming": true,
   "roleTypes": ["general", "tech", "product", "data", "ops", "design", "marketing"],
   "langs": ["zh", "en"],
+  "outputLangs": ["auto", "zh", "en"],
   "extractors": { "pdf": true, "docx": true, "ocr": true },
   "limits": { "maxBodyBytes": 20971520, "maxExtractBytes": 20971520, "maxTextChars": 60000, "llmTimeoutMs": 120000 }
 }
@@ -200,20 +203,23 @@ Response: `{ "ok": true, "text": "...", "meta": { "filename": "resume.pdf", "ext
   "resume": "Experience: ...",
   "roleType": "tech",
   "lang": "en",
+  "outputLang": "zh",
   "model": "hunyuan-2.0-instruct-20251111",
   "stream": true
 }
 ```
 
-- `lang` (optional) — `zh` or `en`; controls the language of the prompt and of the model's answer.
-  Defaults to `zh`, so existing clients keep the previous behaviour.
+- `lang` (optional) — `zh` or `en`: the **interface** language the request comes from. Defaults to `zh`.
+- `outputLang` (optional) — `auto` | `zh` | `en`: the language the **report** is written in.
+  `auto` (default) follows `lang`. Both `lang` and `outputLang` are echoed back (`lang` = report
+  language actually used, `uiLang` = interface language), and in SSE the `meta` frame carries both.
 
-- `stream: false` (default) — returns `{ "ok": true, "content": "...", "model": "...", "usage": { ... }, "elapsedMs": 8421 }`.
+- `stream: false` (default) — returns `{ "ok": true, "content": "...", "model": "...", "lang": "zh", "uiLang": "en", "usage": { ... }, "elapsedMs": 8421 }`.
 - `stream: true` or `Accept: text/event-stream` — returns `text/event-stream`:
 
 ```
 event: meta
-data: {"model":"hunyuan-2.0-instruct-20251111","roleType":"tech","lang":"en","startedAt":"2026-01-01T00:00:00.000Z"}
+data: {"model":"hunyuan-2.0-instruct-20251111","roleType":"tech","lang":"zh","uiLang":"en","startedAt":"2026-01-01T00:00:00.000Z"}
 
 event: delta
 data: {"content":"## 1. Match diagnosis\n"}
