@@ -1,18 +1,19 @@
 {
   "name": "resume-optimizer",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "description": "Self-hosted resume optimizer that streams rewrites from any endpoint speaking the OpenAI chat-completions protocol (Tencent Hunyuan by default); bilingual UI, independent report language",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
     "dev": "node server.js",
-    "check": "node --check server.js && node --check prompt.js && node --check public/i18n.js",
+    "check": "node --check server.js && node --check prompt.js && node --check demo-report.js && node --check public/i18n.js",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "node --test",
     "test:coverage": "node --test --experimental-test-coverage",
+    "capture": "node scripts/capture.js",
     "ci": "npm run check && npm run typecheck && npm run lint && npm run format:check && npm test"
   },
   "engines": {

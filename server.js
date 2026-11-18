@@ -24,6 +24,7 @@ const {
   normalizeLang,
   normalizeOutputLang,
 } = require('./prompt');
+const { buildDemoReport } = require('./demo-report');
 
 // ---------------------------------------------------------------------------
 // Environment
@@ -467,6 +468,7 @@ async function handleHealth(req, res) {
     model: LLM_MODEL,
     hasKey: Boolean(LLM_API_KEY),
     streaming: true,
+    demo: true,
     roleTypes: ROLE_TYPES,
     langs: LANGS,
     outputLangs: OUTPUT_LANGS,
@@ -595,21 +597,48 @@ function normalizeOptimizeInput(body) {
     typeof body.model === 'string' && body.model.trim().length > 0 && body.model.trim().length <= 120
       ? body.model.trim()
       : LLM_MODEL;
-  return { company, position, jd, resume, roleType, lang: outputLang, uiLang, model };
+  return {
+    company,
+    position,
+    jd,
+    resume,
+    roleType,
+    lang: outputLang,
+    uiLang,
+    model,
+    demo: body.demo === true,
+  };
 }
 
 async function handleOptimize(req, res) {
   const body = await readJsonBody(req, MAX_BODY_BYTES);
   const input = normalizeOptimizeInput(body);
 
-  if (!LLM_API_KEY) {
+  const demo = input.demo;
+  if (!demo && !LLM_API_KEY) {
     throw new HttpError(503, 'NO_API_KEY', '服务端未配置 LLM_API_KEY，请编辑 .env 后重启服务');
   }
 
   const wantsStream = body.stream === true || String(req.headers.accept || '').includes('text/event-stream');
-
-  const messages = buildMessages(input);
+  const model = demo ? 'demo' : input.model;
   const started = Date.now();
+
+  if (demo && !wantsStream) {
+    const content = buildDemoReport({ lang: input.lang });
+    sendJson(req, res, 200, {
+      ok: true,
+      demo: true,
+      content,
+      model,
+      lang: input.lang,
+      uiLang: input.uiLang,
+      usage: null,
+      elapsedMs: Date.now() - started,
+    });
+    return;
+  }
+
+  const messages = demo ? [] : buildMessages(input);
 
   if (!wantsStream) {
     const { content, usage } = await callLlm({ messages, model: input.model, stream: false, clientRes: res });
@@ -650,7 +679,8 @@ async function handleOptimize(req, res) {
   });
 
   sendEvent('meta', {
-    model: input.model,
+    model,
+    demo,
     roleType: input.roleType,
     lang: input.lang,
     uiLang: input.uiLang,
@@ -668,15 +698,30 @@ async function handleOptimize(req, res) {
   }, 15000);
 
   try {
-    const { content, usage } = await callLlm({
-      messages,
-      model: input.model,
-      stream: true,
-      clientRes: res,
-      onChunk: (delta) => sendEvent('delta', { content: delta }),
-    });
+    let content;
+    let usage = null;
+    if (demo) {
+      // Replay a canned report with the same SSE shape, so the UI can be tried without a key.
+      content = buildDemoReport({ lang: input.lang });
+      const chunkSize = 24;
+      for (let i = 0; i < content.length && !closed; i += chunkSize) {
+        sendEvent('delta', { content: content.slice(i, i + chunkSize) });
+        await new Promise((resolve) => setTimeout(resolve, 28));
+      }
+    } else {
+      const result = await callLlm({
+        messages,
+        model: input.model,
+        stream: true,
+        clientRes: res,
+        onChunk: (delta) => sendEvent('delta', { content: delta }),
+      });
+      content = result.content;
+      usage = result.usage;
+    }
     sendEvent('done', {
-      model: input.model,
+      model,
+      demo,
       usage: usage || null,
       chars: content.length,
       elapsedMs: Date.now() - started,

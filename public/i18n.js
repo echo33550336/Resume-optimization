@@ -131,6 +131,8 @@
     'output.zh': 'Chinese',
     'output.en': 'English',
     'btn.optimize': 'Optimize resume',
+    'btn.demo': 'Try a demo (no key)',
+    'demo.hint': 'No API key needed: replays a canned report so you can see the structure and streaming.',
 
     // result
     'result.title': 'Result',

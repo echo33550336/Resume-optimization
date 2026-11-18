@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>职优简历 · AI Resume Optimizer — 在线演示</title>
+<meta name="description" content="Streamed, self-hosted resume optimizer demo. Replay of a canned report; run the real thing locally with any chat-completions endpoint.">
+<meta property="og:title" content="职优简历 · AI Resume Optimizer">
+<meta property="og:description" content="A resume that matches the posting — streamed from any chat-completions endpoint.">
+<meta property="og:image" content="./assets/social-preview.png">
+<link rel="icon" href="./assets/screenshot-form.png">
+<style>
+  :root {
+    --bg: #f0eadc; --panel: #fffdf7; --panel2: #f7f1e3; --ink: #3a2f22; --muted: #786a56;
+    --line: #e2d6bd; --gold: #b8860b; --gold2: #d4af37; --radius: 14px;
+    --serif: "Noto Serif SC", Georgia, "Songti SC", serif;
+    --sans: "Noto Sans SC", -apple-system, "Segoe UI", "Microsoft YaHei", sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--sans); line-height: 1.65; }
+  a { color: var(--gold); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 24px; }
+  header { position: sticky; top: 0; z-index: 5; backdrop-filter: blur(8px); background: rgba(240,234,220,.82); border-bottom: 1px solid var(--line); }
+  header .wrap { display: flex; align-items: center; gap: 14px; height: 62px; }
+  .brand { font-family: var(--serif); font-weight: 700; font-size: 20px; }
+  .brand span { color: var(--gold); }
+  header .spacer { flex: 1; }
+  .btn { display: inline-block; border: none; border-radius: 10px; padding: 10px 18px; font-size: 14px; font-weight: 600; cursor: pointer;
+    background: linear-gradient(135deg, var(--gold), var(--gold2)); color: #fff; text-decoration: none; }
+  .btn.ghost { background: var(--panel2); color: var(--ink); border: 1px solid var(--line); }
+  .btn.ghost:hover { border-color: var(--gold); color: var(--gold); text-decoration: none; }
+  .btn:disabled { opacity: .5; cursor: not-allowed; }
+  .hero { padding: 64px 0 28px; }
+  .hero h1 { font-family: var(--serif); font-size: 42px; line-height: 1.25; margin: 0 0 14px; }
+  .hero h1 em { font-style: normal; background: linear-gradient(135deg, var(--gold), var(--gold2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .hero p { font-size: 17px; color: var(--muted); max-width: 720px; margin: 0 0 8px; }
+  .badges { display: flex; gap: 10px; flex-wrap: wrap; margin: 18px 0 24px; }
+  .badge { font-size: 12px; padding: 4px 10px; border: 1px solid var(--line); border-radius: 999px; background: var(--panel); color: var(--muted); }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 22px; box-shadow: 0 10px 30px rgba(90,70,30,.06); }
+  .card h2 { font-family: var(--serif); font-size: 22px; margin: 0 0 10px; }
+  .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .lang { display: inline-flex; border: 1px solid var(--line); border-radius: 999px; overflow: hidden; background: var(--panel2); }
+  .lang button { border: none; background: transparent; padding: 6px 14px; font-size: 13px; cursor: pointer; color: var(--muted); }
+  .lang button.on { background: var(--gold); color: #fff; }
+  .demo-out { margin-top: 16px; background: #fffdf9; border: 1px solid var(--line); border-radius: 12px; padding: 20px 22px; min-height: 260px;
+    font-size: 14.5px; white-space: pre-wrap; color: #2f271d; max-height: 460px; overflow: auto; }
+  .demo-out.streaming::after { content: "▍"; color: var(--gold); animation: blink 1s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+  .demo-out h3 { font-family: var(--serif); margin: 18px 0 6px; color: var(--gold); font-size: 17px; }
+  .demo-out strong { color: #2b2318; }
+  .demo-out ul { margin: 6px 0; padding-left: 20px; }
+  .note { font-size: 12.5px; color: var(--muted); margin-top: 10px; }
+  .grid2 { display: grid; grid-template-columns: 1.15fr .85fr; gap: 20px; align-items: start; }
+  @media (max-width: 860px) { .grid2 { grid-template-columns: 1fr; } .hero h1 { font-size: 32px; } }
+  section { padding: 34px 0; }
+  section h2.title { font-family: var(--serif); font-size: 26px; margin: 0 0 16px; }
+  .shots { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 860px) { .shots { grid-template-columns: 1fr; } }
+  .shots img { width: 100%; border-radius: 12px; border: 1px solid var(--line); display: block; }
+  .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  @media (max-width: 860px) { .steps { grid-template-columns: 1fr; } }
+  .step .n { font-family: var(--serif); font-size: 26px; color: var(--gold); }
+  code { background: var(--panel2); border: 1px solid var(--line); border-radius: 6px; padding: 1px 6px; font-size: 13px; }
+  pre { background: #2b2318; color: #f7f1e3; padding: 14px 16px; border-radius: 10px; overflow: auto; font-size: 13px; }
+  footer { border-top: 1px solid var(--line); padding: 26px 0 40px; color: var(--muted); font-size: 13px; }
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <div class="brand">职优<span>简历</span></div>
+    <div class="spacer"></div>
+    <a class="btn ghost" href="https://github.com/echo33550336/Resume-optimization">GitHub</a>
+  </div>
+</header>
+
+<div class="wrap hero">
+  <h1>让简历<em>对上岗位</em>，流式生成</h1>
+  <p>把一段 JD 和你的简历放进去，模型逐段生成"匹配诊断 → 优化后的简历 → 修改清单 → 缺口与风险"，边生成边显示。</p>
+  <p>自托管、无框架、无数据库：默认接腾讯混元，也可以指向任何兼容 chat-completions 的端点。</p>
+  <div class="badges">
+    <span class="badge">MIT</span><span class="badge">Node ≥ 18</span><span class="badge">Docker ready</span>
+    <span class="badge">SSE streaming</span><span class="badge">中英双语界面</span>
+  </div>
+  <div class="row">
+    <button class="btn" id="playBtn">▶ 播放演示</button>
+    <a class="btn ghost" href="https://github.com/echo33550336/Resume-optimization#quick-start">在本地运行</a>
+  </div>
+</div>
+
+<div class="wrap">
+  <section>
+    <div class="grid2">
+      <div class="card">
+        <div class="row" style="justify-content: space-between;">
+          <h2>在线演示 <span style="font-size:13px;color:var(--muted);font-weight:400;">（预置文本回放）</span></h2>
+          <div class="lang" role="group" aria-label="Language">
+            <button data-lang="zh" class="on" aria-pressed="true">中文</button>
+            <button data-lang="en" aria-pressed="false">EN</button>
+          </div>
+        </div>
+        <div class="row" style="margin-top:6px;">
+          <button class="btn ghost" id="replayBtn">重新播放</button>
+          <span class="note" style="margin:0;">约 5 秒，无需 API Key；真实结果来自你配置的模型。</span>
+        </div>
+        <div class="demo-out" id="out" aria-live="polite"></div>
+      </div>
+      <div class="card">
+        <h2 style="font-size:18px;">真实界面</h2>
+        <img src="./assets/screenshot-form.png" alt="Optimizer form with a job description and resume" style="width:100%;border-radius:10px;border:1px solid var(--line);">
+        <p class="note" style="margin-top:12px;">截图来自真实运行的界面（demo 模式，界面语言英文）。完整流程见下方 GIF。</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2 class="title">完整流程（真实录制）</h2>
+    <img src="./assets/demo.gif" alt="Demo: filling the form and streaming a tailored resume" style="width:100%;border-radius:12px;border:1px solid var(--line);">
+    <div class="shots" style="margin-top:16px;">
+      <img src="./assets/screenshot-result.png" alt="Streamed result with match diagnosis and optimised resume">
+      <img src="./assets/screenshot-result-zh.png" alt="Streamed result in Chinese">
+    </div>
+  </section>
+
+  <section>
+    <h2 class="title">它是怎么跑的</h2>
+    <div class="steps">
+      <div class="card step"><div class="n">01</div><h2 style="font-size:16px;">本地起服务</h2><p class="note" style="margin:0;">一个 Node 进程，前端是原生 HTML/CSS/JS，没有构建步骤，也不依赖数据库。</p></div>
+      <div class="card step"><div class="n">02</div><h2 style="font-size:16px;">配置模型端点</h2><p class="note" style="margin:0;">在 <code>.env</code> 里填 <code>LLM_API_BASE</code> 与 <code>LLM_MODEL</code>，协议是 chat-completions。</p></div>
+      <div class="card step"><div class="n">03</div><h2 style="font-size:16px;">流式拿到结果</h2><p class="note" style="margin:0;">SSE 边生成边渲染，可随时停止、复制 Markdown 或下载成文件。</p></div>
+    </div>
+    <pre style="margin-top:16px;">docker run --rm -p 127.0.0.1:3000:3000 --env-file .env ghcr.io/echo33550336/resume-optimization:latest</pre>
+  </section>
+</div>
+
+<footer>
+  <div class="wrap">
+    这个页面是静态回放，用于让人在 5 秒内看懂产品；完整可交互版本在仓库里，一条 docker 命令即可运行。
+    · <a href="https://github.com/echo33550336/Resume-optimization">github.com/echo33550336/Resume-optimization</a>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var out = document.getElementById('out');
+  var playBtn = document.getElementById('playBtn');
+  var replayBtn = document.getElementById('replayBtn');
+  var currentLang = 'zh';
+  var data = null;
+  var timer = null;
+  var cancelled = false;
+
+  function esc(text) {
+    return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  // Minimal markdown: headings, bold, lists, paragraphs — enough for the canned report.
+  function toHtml(md) {
+    var lines = esc(md).split('\n');
+    var html = '', list = false;
+    for (var i = 0; i < lines.length; i++) {
+      var line = lines[i];
+      if (/^\s*$/.test(line)) { if (list) { html += '</ul>'; list = false; } continue; }
+      var heading = line.match(/^#{1,3}\s+(.*)$/);
+      if (heading) { if (list) { html += '</ul>'; list = false; } html += '<h3>' + heading[1] + '</h3>'; continue; }
+      if (/^\s*[-*]\s+/.test(line)) {
+        if (!list) { html += '<ul>'; list = true; }
+        html += '<li>' + line.replace(/^\s*[-*]\s+/, '') + '</li>';
+        continue;
+      }
+      if (list) { html += '</ul>'; list = false; }
+      html += '<p>' + line + '</p>';
+    }
+    if (list) html += '</ul>';
+    return html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  }
+
+  function stop() {
+    cancelled = true;
+    if (timer) clearTimeout(timer);
+    timer = null;
+    out.classList.remove('streaming');
+  }
+
+  function play() {
+    stop();
+    cancelled = false;
+    if (!data) return;
+    var text = data[currentLang] || '';
+    var pos = 0;
+    out.textContent = '';
+    out.classList.add('streaming');
+    // 24 chars every 28 ms, mirroring the server's demo SSE pacing.
+    function step() {
+      if (cancelled) return;
+      pos = Math.min(text.length, pos + 24);
+      out.innerHTML = toHtml(text.slice(0, pos));
+      if (pos < text.length) timer = setTimeout(step, 28);
+      else { out.classList.remove('streaming'); timer = null; }
+    }
+    step();
+  }
+
+  function setLang(lang) {
+    currentLang = lang;
+    Array.prototype.forEach.call(document.querySelectorAll('.lang button'), function (b) {
+      var on = b.getAttribute('data-lang') === lang;
+      b.classList.toggle('on', on);
+      b.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+    document.documentElement.lang = lang === 'zh' ? 'zh-CN' : 'en';
+    play();
+  }
+
+  Array.prototype.forEach.call(document.querySelectorAll('.lang button'), function (b) {
+    b.addEventListener('click', function () { setLang(b.getAttribute('data-lang')); });
+  });
+  playBtn.addEventListener('click', function () { play(); });
+  replayBtn.addEventListener('click', function () { play(); });
+
+  fetch('./assets/demo-report.json')
+    .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+    .then(function (json) { data = json; play(); })
+    .catch(function (err) {
+      out.textContent = '演示数据加载失败：' + err.message + '\n（直接运行仓库里的应用即可看到真实效果。）';
+    });
+})();
+</script>
+</body>
+</html>

@@ -134,6 +134,9 @@
   .btn:disabled { opacity: .5; cursor: not-allowed; transform: none; }
   .btn-secondary { background: var(--panel2); color: var(--text); border: 1px solid var(--border); box-shadow: none; }
   .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+  .demo-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .demo-row .btn { width: auto; padding: 8px 14px; font-size: 13px; }
+  .demo-row .hint { font-size: 12px; color: var(--muted); }
 
   .optimizer-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
   @media (max-width: 900px) { .optimizer-grid { grid-template-columns: 1fr; } .row, .row.three { grid-template-columns: 1fr; } }
@@ -348,6 +351,10 @@
           </div>
         </div>
         <div><label data-i18n="label.action">操作</label><button class="btn" id="optimizeBtn" data-i18n="btn.optimize">开始优化简历</button></div>
+        <div class="demo-row">
+          <button class="btn btn-secondary" id="demoBtn" data-i18n="btn.demo">试试演示（无需 Key）</button>
+          <span class="hint" data-i18n="demo.hint">不需要 API Key：播放一段预置示例，用来感受输出结构与流式效果。</span>
+        </div>
       </section>
     </div>
     <section class="result">
@@ -530,6 +537,15 @@
     showView('optimizer');
   }
 
+  /** Fill the form with the built-in example, keeping whatever the visitor already typed. */
+  function fillDemoForm() {
+    const ex = pickExample('pm');
+    if (!$('company').value.trim()) $('company').value = ex.company;
+    if (!$('position').value.trim()) $('position').value = ex.position;
+    if (!$('jd').value.trim()) $('jd').value = ex.jd;
+    if (!$('resume').value.trim()) $('resume').value = ex.resume;
+  }
+
   async function checkHealth() {
     try {
       const r = await fetch('/api/health');
@@ -542,6 +558,12 @@
     }
   }
   checkHealth();
+
+  // `?demo=1` deep link used by the GitHub Pages demo page and launch posts.
+  if (new URLSearchParams(location.search).get('demo') === '1') {
+    fillDemoForm();
+    showView('optimizer');
+  }
 
   function mdToHtml(md) {
     let html = md.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -804,7 +826,8 @@
     return kept.length ? ' · ' + kept.join(' · ') : '';
   }
 
-  async function runOptimize() {
+  async function runOptimize(demo = false) {
+    if (demo) fillDemoForm();
     const jd = $('jd').value.trim();
     const resume = $('resume').value.trim();
     if (!jd || !resume) {
@@ -837,6 +860,7 @@
           lang: currentLang(),
           outputLang: $('outputLang').value,
           stream: true,
+          demo,
         }),
         signal: streamController.signal,
       });
@@ -883,7 +907,8 @@
     }
   }
 
-  $('optimizeBtn').addEventListener('click', runOptimize);
+  $('optimizeBtn').addEventListener('click', () => runOptimize(false));
+  $('demoBtn').addEventListener('click', () => runOptimize(true));
   $('stopBtn').addEventListener('click', () => { if (streamController) streamController.abort(); });
 
   $('copyBtn').addEventListener('click', () => {

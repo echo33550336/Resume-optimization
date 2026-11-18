@@ -3,3 +3,7 @@ coverage/
 .env
 *.log
 .DS_Store
+
+# generated media intermediates
+docs/assets/frames/
+docs/assets/pages-demo.png

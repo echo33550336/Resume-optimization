@@ -11,6 +11,19 @@
 [![Backend](https://img.shields.io/badge/backend-zero--framework-black)](server.js)
 [![Model](https://img.shields.io/badge/model-bring--your--own-informational)](#模型是哪来的)
 [![Streaming](https://img.shields.io/badge/output-SSE-purple)](#主要特性)
+[![Demo](https://img.shields.io/badge/%E2%96%B6-%E5%9C%A8%E7%BA%BF%E6%BC%94%E7%A4%BA-gold)](https://echo33550336.github.io/Resume-optimization/)
+
+<p align="center">
+  <img src="docs/assets/demo.gif" alt="填写表单并流式生成简历优化结果" width="820">
+</p>
+
+<p align="center">
+  <a href="https://echo33550336.github.io/Resume-optimization/"><b>▶ 5 秒看懂：在线演示</b></a>
+  &nbsp;·&nbsp;
+  <a href="docs/assets/screenshot-result-zh.png">结果截图</a>
+  &nbsp;·&nbsp;
+  <a href="#快速开始">在本地运行</a>
+</p>
 
 ---
 
@@ -54,6 +67,7 @@ README 里出现 "OpenAI-compatible"，指的是**报文格式**，不是厂商�
 - **岗位类别聚焦** —— 技术 / 产品 / 数据 / 运营 / 设计 / 市场 / 通用，每类有不同的优化侧重。
 - **中英双语界面** —— 一个按钮切换全部文案，选择记在 `localStorage`。
 - **报告语言独立** —— 界面是中文也能让模型用英文写报告，反之亦然（跟随界面 / 中文 / English）。
+- **演示模式** —— 请求里带 `demo: true`（或打开 `/?demo=1`）会用同一套 SSE 管线回放一份预置四段报告，不需要 key、也不调用模型；仓库里的 [`docs/`](docs/index.html) 静态回放页已发布到 GitHub Pages。
 - **零框架后端** —— 只有一个 `server.js`，没有 Express、没有构建步骤、没有数据库。
 - **工程化齐备** —— TypeScript(JSDoc) 类型检查、ESLint + Prettier、19 个单元/集成测试、GitHub Actions 矩阵（Node 18/20/22 + Docker 构建）、非 root 容器镜像。
 
@@ -118,7 +132,7 @@ docker run --rm -p 127.0.0.1:3000:3000 --env-file .env \
   ghcr.io/echo33550336/resume-optimization:latest
 ```
 
-打开 <http://127.0.0.1:3000> 即可。
+打开 <http://127.0.0.1:3000> 即可。想先不配 key 看效果，打开 <http://127.0.0.1:3000/?demo=1> 或点表单里的「试试演示（无需 Key）」——回放一段预置报告，不调用模型。
 
 ### 方式二：本地跑源码
 
@@ -215,11 +229,23 @@ docker compose up -d --build
 
 镜像只安装生产依赖、以非 root 的 `node` 用户运行，并带 `HEALTHCHECK` 轮询 `/api/health`。
 
+### 静态演示页（GitHub Pages）
+
+`docs/` 是一个不依赖服务端的回放页：`docs/index.html` 读取 `docs/assets/demo-report.json`，用 5 秒打字机动画回放同一份四段报告，并展示录制的 GIF 与截图。发布方式：**Settings → Pages → Deploy from a branch → `main` / `/docs`**，地址是 <https://echo33550336.github.io/Resume-optimization/>。页面里没有密钥，也不会调用模型。
+
+界面改完后重新生成素材：
+
+```bash
+node server.js                                        # 终端 1（demo 模式不需要 key）
+node scripts/capture.js --base http://127.0.0.1:3000  # 截图 + docs/assets/frames
+python scripts/build-media.py                         # demo.gif、social-preview.png、demo-report.json
+```
+
 ## 开发与质量门禁
 
 ```bash
 npm run ci        # check → typecheck → lint → format:check → test
-npm run test      # 19 个测试：提示词 7 + i18n 4 + 服务集成 8
+npm run test      # 23 个测试：提示词 7 + i18n 4 + 预置报告 3 + 服务集成 9
 npm run typecheck # tsc --noEmit（JSDoc 类型）
 ```
 
@@ -230,7 +256,7 @@ npm run typecheck # tsc --noEmit（JSDoc 类型）
 <details>
 <summary>没有 API key 能不能先看看效果？</summary>
 
-界面能打开，但生成需要 key。最省事的做法是拿一个腾讯混元的 key（`LLM_API_BASE` 默认就是它），或者任何兼容 chat-completions 的端点。
+可以。打开 <http://127.0.0.1:3000/?demo=1>，或点表单里的「试试演示（无需 Key）」：服务端会用同一套 SSE 管线回放一份预置报告，不调用模型。不想装任何东西，也可以先看 [GitHub Pages 静态演示](https://echo33550336.github.io/Resume-optimization/)。
 
 </details>
 

@@ -1,4 +1,4 @@
-{
+﻿{
   "compilerOptions": {
     "target": "ES2022",
     "module": "nodenext",
@@ -16,5 +16,12 @@
     "skipLibCheck": true,
     "resolveJsonModule": true
   },
-  "include": ["server.js", "prompt.js", "public/i18n.js", "test/**/*.js", "eslint.config.js"]
+  "include": [
+    "server.js",
+    "prompt.js",
+    "demo-report.js",
+    "public/i18n.js",
+    "test/**/*.js",
+    "eslint.config.js"
+  ]
 }

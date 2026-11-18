@@ -4,6 +4,8 @@ README 首屏的转化率几乎全部取决于这里的素材。目标：**1 张
 
 当前 README 只有徽章、没有任何产品截图，这是目前最大的门面缺口。
 
+> **已被自动化替代**：素材现在由 `node scripts/capture.js`（Edge/Chrome headless + DevTools 截图）和 `python scripts/build-media.py`（GIF/社交预览/回放数据）生成，输出在 `docs/assets/`。本指南保留为手工重录、挑选更好的分镜时的参考。
+
 ## 一、准备（2 分钟）
 
 1. 起服务：`npm start`，打开 <http://127.0.0.1:3000>。

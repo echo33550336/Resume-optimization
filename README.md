@@ -11,6 +11,19 @@
 [![Backend](https://img.shields.io/badge/backend-zero--framework-black)](server.js)
 [![Model](https://img.shields.io/badge/model-bring--your--own-informational)](#which-model-does-it-use)
 [![Streaming](https://img.shields.io/badge/output-SSE-purple)](#features)
+[![Demo](https://img.shields.io/badge/%E2%96%B6-live%20demo-gold)](https://echo33550336.github.io/Resume-optimization/)
+
+<p align="center">
+  <img src="docs/assets/demo.gif" alt="Filling the form and streaming a tailored resume" width="820">
+</p>
+
+<p align="center">
+  <a href="https://echo33550336.github.io/Resume-optimization/"><b>▶ Play the 5-second interactive demo</b></a>
+  &nbsp;·&nbsp;
+  <a href="docs/assets/screenshot-result.png">Result screenshot</a>
+  &nbsp;·&nbsp;
+  <a href="#quick-start">Run it locally</a>
+</p>
 
 ---
 
@@ -62,6 +75,7 @@ path reaches all of them. What the model actually is, is decided by `LLM_API_BAS
 - **Theme system** — brand gold / amber / dark, four fonts, four background patterns, persisted in `localStorage`.
 - **Local-first and private** — nothing leaves your machine except the request to the LLM endpoint you configured.
 - **Hardened server** — LLM timeout with bounded retries, typed error codes, body/upload/text limits, localhost-only CORS, static path containment, security headers, graceful shutdown.
+- **Demo mode** — `POST /api/optimize` with `demo: true` (or open `/?demo=1`) replays a canned four-part report through the same SSE pipeline, so the UI can be tried with no key and no model call. A replay-only static page in [`docs/`](docs/index.html) is published to GitHub Pages.
 
 ## How it works
 
@@ -150,6 +164,10 @@ npm run check            # syntax check for server.js, prompt.js and public/i18n
 
 Without `npm install` the app still runs: text pasting works, uploads answer with a clear
 "extractor not installed" message, and `GET /api/health` reports which extractors are available.
+
+Want to look before configuring anything? Open <http://127.0.0.1:3000/?demo=1> (or click **Try a demo**
+in the form) to replay a canned report with no key and no model call. The same replay, as a static
+page, is the [GitHub Pages demo](https://echo33550336.github.io/Resume-optimization/).
 
 ### Minimal `.env`
 
@@ -344,6 +362,23 @@ docker run --rm -p 127.0.0.1:3000:3000 --env-file .env resume-optimizer
 
 The image installs production dependencies only, runs as the unprivileged `node` user, and ships a
 `HEALTHCHECK` that polls `/api/health`, so orchestration platforms can restart it on failure.
+
+### Static demo page (GitHub Pages)
+
+`docs/` is a standalone, server-less replay of the product page and a demo run: `docs/index.html`
+reads `docs/assets/demo-report.json` and types out the same four-part report with a 5-second
+streaming animation, plus the recorded GIF and screenshots. It is published with
+**Settings → Pages → Deploy from a branch → `main` / `/docs`** and is reachable at
+<https://echo33550336.github.io/Resume-optimization/>. Nothing secret lives there; the replay never
+calls a model.
+
+Regenerate the media after UI changes:
+
+```bash
+node server.js                                        # terminal 1 (demo mode needs no key)
+node scripts/capture.js --base http://127.0.0.1:3000  # screenshots + docs/assets/frames
+python scripts/build-media.py                         # demo.gif, social-preview.png, demo-report.json
+```
 
 ## Agent Skill
 

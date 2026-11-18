@@ -7,7 +7,14 @@ module.exports = [
   js.configs.recommended,
   {
     // Node side: CommonJS with the Node globals.
-    files: ['server.js', 'prompt.js', 'test/**/*.js', 'eslint.config.js'],
+    files: [
+      'server.js',
+      'prompt.js',
+      'demo-report.js',
+      'scripts/**/*.js',
+      'test/**/*.js',
+      'eslint.config.js',
+    ],
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: 'commonjs',

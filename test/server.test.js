@@ -223,6 +223,27 @@ test('server integration', async (t) => {
     assert.equal(deltas, 'REPORT LANG en');
   });
 
+  await t.test('demo mode replays a canned report without an API key', async () => {
+    const res = await request(app.port, 'POST', '/api/optimize', {
+      body: {
+        company: 'Acme',
+        position: 'Engineer',
+        jd: 'jd',
+        resume: 'resume',
+        demo: true,
+        lang: 'en',
+        outputLang: 'en',
+      },
+    });
+    assert.equal(res.status, 200);
+    const json = JSON.parse(res.body);
+    assert.equal(json.ok, true);
+    assert.equal(json.demo, true);
+    assert.equal(json.model, 'demo');
+    assert.match(json.content, /Match Diagnosis/);
+    assert.ok(!/[\u4e00-\u9fff]/.test(json.content), 'English demo report must not contain CJK');
+  });
+
   await t.test('extract decodes a plain text upload', async () => {
     const text = 'hello from a txt file';
     const res = await request(app.port, 'POST', '/api/extract', {
