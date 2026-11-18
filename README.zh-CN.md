@@ -6,7 +6,7 @@
 
 [![Node](https://img.shields.io/badge/node-%3E%3D18-brightgreen)](https://nodejs.org)
 [![CI](https://github.com/echo33550336/Resume-optimization/actions/workflows/ci.yml/badge.svg)](https://github.com/echo33550336/Resume-optimization/actions/workflows/ci.yml)
-[![Docker](https://img.shields.io/badge/docker-ready-2496ED?logo=docker&logoColor=white)](./Dockerfile)
+[![Docker](https://img.shields.io/badge/ghcr.io-resume--optimization-2496ED?logo=docker&logoColor=white)](https://github.com/echo33550336/Resume-optimization/pkgs/container/resume-optimization)
 [![License](https://img.shields.io/badge/license-MIT-blue)](./LICENSE)
 [![Backend](https://img.shields.io/badge/backend-zero--framework-black)](server.js)
 [![Model](https://img.shields.io/badge/model-bring--your--own-informational)](#模型是哪来的)
