@@ -16,7 +16,14 @@
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
-const { buildMessages, ROLE_TYPES, LANGS, OUTPUT_LANGS, normalizeLang, normalizeOutputLang } = require('./prompt');
+const {
+  buildMessages,
+  ROLE_TYPES,
+  LANGS,
+  OUTPUT_LANGS,
+  normalizeLang,
+  normalizeOutputLang,
+} = require('./prompt');
 
 // ---------------------------------------------------------------------------
 // Environment
@@ -39,10 +46,7 @@ function loadDotEnv() {
     const key = match[1];
     if (process.env[key] !== undefined) continue; // real env wins
     let value = match[2].trim();
-    if (
-      (value.startsWith('"') && value.endsWith('"')) ||
-      (value.startsWith("'") && value.endsWith("'"))
-    ) {
+    if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
       value = value.slice(1, -1);
     }
     process.env[key] = value;
@@ -139,6 +143,8 @@ class HttpError extends Error {
     super(message);
     this.status = status;
     this.code = code;
+    /** Whether the LLM call that produced this error may be retried. */
+    this.retryable = true;
   }
 }
 
@@ -183,6 +189,7 @@ function corsHeaders(req) {
 
 function sendJson(req, res, status, payload) {
   const body = Buffer.from(JSON.stringify(payload), 'utf8');
+  /** @type {Record<string, string | number>} */
   const headers = {
     ...securityHeaders(),
     ...corsHeaders(req),
@@ -419,7 +426,7 @@ async function callLlmOnce({ messages, model, stream, clientRes, onChunk }) {
   return { content, usage };
 }
 
-async function callLlm({ messages, model, stream, clientRes, onChunk }) {
+async function callLlm({ messages, model, stream, clientRes, onChunk = null }) {
   let lastError = null;
   let emitted = false;
   const attempts = LLM_RETRIES + 1;
@@ -537,7 +544,11 @@ async function handleExtract(req, res) {
     throw new HttpError(400, 'INVALID_BASE64', '文件内容为空');
   }
   if (buffer.length > MAX_EXTRACT_BYTES) {
-    throw new HttpError(413, 'FILE_TOO_LARGE', `文件超过 ${Math.round(MAX_EXTRACT_BYTES / 1024 / 1024)}MB 上限`);
+    throw new HttpError(
+      413,
+      'FILE_TOO_LARGE',
+      `文件超过 ${Math.round(MAX_EXTRACT_BYTES / 1024 / 1024)}MB 上限`
+    );
   }
 
   let ext = path.extname(filename).slice(1).toLowerCase();
@@ -546,6 +557,7 @@ async function handleExtract(req, res) {
   const started = Date.now();
   const text = await extractFromFile(filename, buffer, ext);
   const cleaned = String(text)
+    // eslint-disable-next-line no-control-regex -- NUL bytes come from binary-ish uploads
     .replace(/\u0000/g, '')
     .replace(/\r\n/g, '\n')
     .replace(/[ \t]+\n/g, '\n')
@@ -594,9 +606,7 @@ async function handleOptimize(req, res) {
     throw new HttpError(503, 'NO_API_KEY', '服务端未配置 LLM_API_KEY，请编辑 .env 后重启服务');
   }
 
-  const wantsStream =
-    body.stream === true ||
-    String(req.headers.accept || '').includes('text/event-stream');
+  const wantsStream = body.stream === true || String(req.headers.accept || '').includes('text/event-stream');
 
   const messages = buildMessages(input);
   const started = Date.now();
@@ -794,7 +804,9 @@ server.on('clientError', (err, socket) => {
 server.listen(PORT, HOST, () => {
   log(`resume-optimizer listening on http://${HOST}:${PORT}`);
   log(`LLM: ${LLM_MODEL} @ ${LLM_API_BASE}${LLM_API_KEY ? '' : ' (no API key configured)'}`);
-  const missing = Object.entries(extractors).filter(([, v]) => !v).map(([k]) => k);
+  const missing = Object.entries(extractors)
+    .filter(([, v]) => !v)
+    .map(([k]) => k);
   if (missing.length) log(`extractors unavailable: ${missing.join(', ')} (run npm install)`);
 });
 

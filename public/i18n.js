@@ -51,9 +51,11 @@
     'feat.theme.title': 'Themeable',
     'feat.theme.body': 'Gold, amber or dark; pick a font and a background that suits you.',
     'feat.speed.title': 'Seconds, not minutes',
-    'feat.speed.body': 'Streamed from an LLM — the first section shows up while the rest is still generating.',
+    'feat.speed.body':
+      'Streamed from an LLM — the first section shows up while the rest is still generating.',
     'feat.privacy.title': 'Private by design',
-    'feat.privacy.body': 'Your resume travels only between this machine and the model you configure. Nothing is stored.',
+    'feat.privacy.body':
+      'Your resume travels only between this machine and the model you configure. Nothing is stored.',
 
     'section.tech.title': 'Stack',
     'section.tech.body': 'Zero-framework backend plus pluggable document extraction',
@@ -283,7 +285,9 @@
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved && LANGS.some((l) => l.code === saved)) return saved;
-    } catch (e) { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
     const nav = (navigator.language || 'zh').toLowerCase();
     return nav.startsWith('en') ? 'en' : 'zh';
   }
@@ -381,7 +385,7 @@
     if (title) document.title = title;
     const langEl = document.querySelectorAll('.lang-btn');
     langEl.forEach((b) => {
-      const on = b.dataset.lang === current;
+      const on = b.getAttribute('data-lang') === current;
       b.classList.toggle('active', on);
       b.setAttribute('aria-pressed', on ? 'true' : 'false');
     });
@@ -390,7 +394,11 @@
 
   function setLang(lang) {
     if (!LANGS.some((l) => l.code === lang)) return;
-    try { localStorage.setItem(STORAGE_KEY, lang); } catch (e) { /* ignore */ }
+    try {
+      localStorage.setItem(STORAGE_KEY, lang);
+    } catch {
+      /* ignore */
+    }
     apply(lang);
   }
 
@@ -400,12 +408,17 @@
     apply(pickLang());
   }
 
-  window.RI18N = {
+  // Expose the runtime on `window`. The cast keeps `tsc --checkJs` happy because
+  // the Window interface has no RI18N member (the page is plain HTML + scripts).
+  const scope = /** @type {any} */ (window);
+  scope.RI18N = {
     LANGS,
     t,
     apply,
     setLang,
-    get lang() { return current; },
+    get lang() {
+      return current;
+    },
     translateElement: (el) => translateElement(el, current),
     isReady: () => ready,
   };

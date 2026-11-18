@@ -3,6 +3,8 @@
 > Tailor a resume to a specific job description with an LLM that behaves like a hiring manager — streamed live, fully local, zero frameworks.
 
 [![Node](https://img.shields.io/badge/node-%3E%3D18-brightgreen)](https://nodejs.org)
+[![CI](https://github.com/echo33550336/Resume-optimization/actions/workflows/ci.yml/badge.svg)](https://github.com/echo33550336/Resume-optimization/actions/workflows/ci.yml)
+[![Docker](https://img.shields.io/badge/docker-ready-2496ED?logo=docker&logoColor=white)](./Dockerfile)
 [![License](https://img.shields.io/badge/license-MIT-blue)](./LICENSE)
 [![Backend](https://img.shields.io/badge/backend-zero--framework-black)](server.js)
 [![Streaming](https://img.shields.io/badge/output-SSE-purple)](#features)
@@ -20,7 +22,7 @@ senior HR director returns a four-part report:
 3. **Change log** — the most important 5–8 edits and why each one matters.
 4. **Gaps and risks** — information the recruiter will ask for that the resume does not answer yet.
 
-The point is not "rewrite my bullets" — it is *diagnosis first, rewrite second*: the model must
+The point is not "rewrite my bullets" — it is _diagnosis first, rewrite second_: the model must
 justify the score, then show exactly which text moved the score, then flag what is still missing.
 Text streams into the page as it is produced, so a 3,000-token rewrite becomes readable in seconds
 instead of a spinner and a wait.
@@ -70,13 +72,17 @@ component that talks to the LLM you configure.
 
 ## Tech stack
 
-| Layer | Choice |
-| --- | --- |
-| Server | Node.js native `http` — no framework, no router dependency |
-| Frontend | Hand-written HTML / CSS / JS — no bundler, no build step |
-| LLM | Any OpenAI-compatible `/chat/completions` endpoint (Tencent Hunyuan by default) |
-| Extractors | `pdf-parse`, `mammoth`, `tesseract.js` — optional and lazily required |
-| Prompts | `prompt.js` — single source of truth, shared with the Agent Skill |
+| Layer      | Choice                                                                          |
+| ---------- | ------------------------------------------------------------------------------- |
+| Server     | Node.js native `http` — no framework, no router dependency                      |
+| Frontend   | Hand-written HTML / CSS / JS — no bundler, no build step                        |
+| LLM        | Any OpenAI-compatible `/chat/completions` endpoint (Tencent Hunyuan by default) |
+| Extractors | `pdf-parse`, `mammoth`, `tesseract.js` — optional and lazily required           |
+| Prompts    | `prompt.js` — single source of truth, shared with the Agent Skill               |
+| Types      | TypeScript in `checkJs` mode over JSDoc — no transpile step                     |
+| Quality    | ESLint (flat config), Prettier, `node:test` unit + HTTP integration tests       |
+| CI / CD    | GitHub Actions: Node 18/20/22 matrix, lint/format/type/test gates, Docker build |
+| Runtime    | Still zero production dependencies beyond the three extractors                  |
 
 ## Project structure
 
@@ -89,6 +95,17 @@ resume-optimizer/
 │   ├── i18n.js                # zh / en dictionary and DOM translation runtime
 │   ├── logo.svg
 │   └── bg.svg
+├── test/
+│   ├── prompt.test.js         # prompt builders + language normalisation
+│   ├── i18n.test.js           # dictionary coverage + DOM translation runtime
+│   └── server.test.js         # HTTP integration: health, SSE, extract, limits, traversal
+├── .github/workflows/ci.yml   # CI: Node 18/20/22 × (check, typecheck, lint, format, test) + Docker build
+├── tsconfig.json              # tsc --noEmit, checkJs over the plain JS sources
+├── eslint.config.js           # flat ESLint config (Node + browser groups)
+├── .prettierrc.json           # formatting rules; public/index.html stays hand-formatted
+├── Dockerfile                 # node:22-alpine, production deps only, non-root, healthcheck
+├── docker-compose.yml         # local container with .env passthrough
+├── .nvmrc / .editorconfig / .gitattributes
 ├── .commandcode/
 │   ├── skills/resume-optimizer/SKILL.md   # Agent Skill definition
 │   └── taste/taste.md
@@ -127,20 +144,20 @@ LLM_MODEL=gpt-4o-mini
 
 Every setting can come from `.env` or from real environment variables (real environment wins):
 
-| Variable | Default | Meaning |
-| --- | --- | --- |
-| `LLM_API_KEY` | — | Bearer token for the endpoint (**required**) |
-| `LLM_API_BASE` | `https://tokenhub.tencentmaas.com/v1` | OpenAI-compatible base URL |
-| `LLM_MODEL` | `hunyuan-2.0-instruct-20251111` | Default model |
-| `LLM_MAX_TOKENS` | `4096` | Max output tokens |
-| `LLM_TIMEOUT_MS` | `120000` | Per-attempt timeout (minimum 5000) |
-| `LLM_RETRIES` | `2` | Retries on 429 / 5xx / network failure, before any token is streamed |
-| `PORT` | `3000` | Listen port |
-| `HOST` | `127.0.0.1` | Listen host — keep loopback unless you know why |
-| `MAX_BODY_BYTES` | `20971520` (20 MB) | Max JSON request body |
-| `MAX_EXTRACT_BYTES` | `20971520` (20 MB) | Max uploaded file size |
-| `MAX_TEXT_CHARS` | `60000` | Max characters for JD / resume / extracted text |
-| `ALLOWED_ORIGINS` | — | Extra CORS origins, comma separated (localhost is always allowed) |
+| Variable            | Default                               | Meaning                                                              |
+| ------------------- | ------------------------------------- | -------------------------------------------------------------------- |
+| `LLM_API_KEY`       | —                                     | Bearer token for the endpoint (**required**)                         |
+| `LLM_API_BASE`      | `https://tokenhub.tencentmaas.com/v1` | OpenAI-compatible base URL                                           |
+| `LLM_MODEL`         | `hunyuan-2.0-instruct-20251111`       | Default model                                                        |
+| `LLM_MAX_TOKENS`    | `4096`                                | Max output tokens                                                    |
+| `LLM_TIMEOUT_MS`    | `120000`                              | Per-attempt timeout (minimum 5000)                                   |
+| `LLM_RETRIES`       | `2`                                   | Retries on 429 / 5xx / network failure, before any token is streamed |
+| `PORT`              | `3000`                                | Listen port                                                          |
+| `HOST`              | `127.0.0.1`                           | Listen host — keep loopback unless you know why                      |
+| `MAX_BODY_BYTES`    | `20971520` (20 MB)                    | Max JSON request body                                                |
+| `MAX_EXTRACT_BYTES` | `20971520` (20 MB)                    | Max uploaded file size                                               |
+| `MAX_TEXT_CHARS`    | `60000`                               | Max characters for JD / resume / extracted text                      |
+| `ALLOWED_ORIGINS`   | —                                     | Extra CORS origins, comma separated (localhost is always allowed)    |
 
 ## Usage
 
@@ -181,7 +198,12 @@ All JSON endpoints answer `{ "ok": true, ... }` on success and `{ "ok": false, "
   "langs": ["zh", "en"],
   "outputLangs": ["auto", "zh", "en"],
   "extractors": { "pdf": true, "docx": true, "ocr": true },
-  "limits": { "maxBodyBytes": 20971520, "maxExtractBytes": 20971520, "maxTextChars": 60000, "llmTimeoutMs": 120000 }
+  "limits": {
+    "maxBodyBytes": 20971520,
+    "maxExtractBytes": 20971520,
+    "maxTextChars": 60000,
+    "llmTimeoutMs": 120000
+  }
 }
 ```
 
@@ -236,24 +258,24 @@ stream has started arrive as `event: error` frames; failures before it arrive as
 
 ### Error codes
 
-| HTTP | `code` | When |
-| --- | --- | --- |
-| 400 | `INVALID_JSON` | Body is not valid JSON |
-| 400 | `INVALID_REQUEST` | Missing / empty required field |
-| 400 | `TEXT_TOO_LONG` | Text exceeds `MAX_TEXT_CHARS` |
-| 400 | `INVALID_BASE64` | Upload payload is not valid base64 |
-| 404 | `NOT_FOUND` | Unknown API route |
-| 405 | `METHOD_NOT_ALLOWED` | Wrong HTTP verb for the route |
-| 413 | `BODY_TOO_LARGE` | Request body over `MAX_BODY_BYTES` |
-| 413 | `FILE_TOO_LARGE` | Upload over `MAX_EXTRACT_BYTES` |
-| 415 | `UNSUPPORTED_TYPE` | File extension not supported |
-| 422 | `EXTRACT_EMPTY` | Extraction produced no text |
-| 429 | `UPSTREAM_RATE_LIMITED` | LLM endpoint rate-limited the request |
-| 502 | `UPSTREAM_NETWORK` / `UPSTREAM_ERROR` / `UPSTREAM_EMPTY` / `UPSTREAM_INVALID` / `UPSTREAM_STREAM_ERROR` | Upstream transport, status, empty or malformed answer |
-| 503 | `NO_API_KEY` | Server has no `LLM_API_KEY` |
-| 503 | `EXTRACTOR_UNAVAILABLE` | PDF / DOCX / OCR dependency not installed |
-| 504 | `UPSTREAM_TIMEOUT` | No answer within `LLM_TIMEOUT_MS` |
-| 499 | `CLIENT_CLOSED` | Browser disconnected (server-side only, not sent to the client) |
+| HTTP | `code`                                                                                                  | When                                                            |
+| ---- | ------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| 400  | `INVALID_JSON`                                                                                          | Body is not valid JSON                                          |
+| 400  | `INVALID_REQUEST`                                                                                       | Missing / empty required field                                  |
+| 400  | `TEXT_TOO_LONG`                                                                                         | Text exceeds `MAX_TEXT_CHARS`                                   |
+| 400  | `INVALID_BASE64`                                                                                        | Upload payload is not valid base64                              |
+| 404  | `NOT_FOUND`                                                                                             | Unknown API route                                               |
+| 405  | `METHOD_NOT_ALLOWED`                                                                                    | Wrong HTTP verb for the route                                   |
+| 413  | `BODY_TOO_LARGE`                                                                                        | Request body over `MAX_BODY_BYTES`                              |
+| 413  | `FILE_TOO_LARGE`                                                                                        | Upload over `MAX_EXTRACT_BYTES`                                 |
+| 415  | `UNSUPPORTED_TYPE`                                                                                      | File extension not supported                                    |
+| 422  | `EXTRACT_EMPTY`                                                                                         | Extraction produced no text                                     |
+| 429  | `UPSTREAM_RATE_LIMITED`                                                                                 | LLM endpoint rate-limited the request                           |
+| 502  | `UPSTREAM_NETWORK` / `UPSTREAM_ERROR` / `UPSTREAM_EMPTY` / `UPSTREAM_INVALID` / `UPSTREAM_STREAM_ERROR` | Upstream transport, status, empty or malformed answer           |
+| 503  | `NO_API_KEY`                                                                                            | Server has no `LLM_API_KEY`                                     |
+| 503  | `EXTRACTOR_UNAVAILABLE`                                                                                 | PDF / DOCX / OCR dependency not installed                       |
+| 504  | `UPSTREAM_TIMEOUT`                                                                                      | No answer within `LLM_TIMEOUT_MS`                               |
+| 499  | `CLIENT_CLOSED`                                                                                         | Browser disconnected (server-side only, not sent to the client) |
 
 ## Security model
 
@@ -269,6 +291,23 @@ stream has started arrive as `event: error` frames; failures before it arrive as
 - For a container or an internal server, set `HOST=0.0.0.0`, keep `ALLOWED_ORIGINS` tight, and terminate TLS at a proxy.
 - Optional extractors pull native/heavy dependencies (`tesseract.js` downloads language data on first OCR). Install them only if you need file uploads.
 
+### Docker
+
+```bash
+cp .env.example .env      # then fill LLM_API_KEY / LLM_API_BASE / LLM_MODEL
+docker compose up -d --build
+```
+
+Or without Compose:
+
+```bash
+docker build -t resume-optimizer .
+docker run --rm -p 127.0.0.1:3000:3000 --env-file .env resume-optimizer
+```
+
+The image installs production dependencies only, runs as the unprivileged `node` user, and ships a
+`HEALTHCHECK` that polls `/api/health`, so orchestration platforms can restart it on failure.
+
 ## Agent Skill
 
 `.commandcode/skills/resume-optimizer/SKILL.md` lets an Agent CLI run the same workflow without the
@@ -278,9 +317,25 @@ canonical prompt lives in `prompt.js`; when you change one, update the other so 
 ## Development
 
 ```bash
-npm run check    # node --check server.js && node --check prompt.js
-npm start        # run locally
+npm install        # runtime + dev dependencies (dev only needed for the quality gates)
+npm start          # run locally on http://127.0.0.1:3000
 ```
+
+Quality gates — the same commands CI runs:
+
+| Command                 | What it does                                                              |
+| ----------------------- | ------------------------------------------------------------------------- |
+| `npm run check`         | `node --check` on `server.js`, `prompt.js`, `public/i18n.js`              |
+| `npm run typecheck`     | `tsc --noEmit` with `allowJs`/`checkJs` — types come from JSDoc comments  |
+| `npm run lint`          | ESLint flat config: Node rules for the server/tests, browser rules for JS |
+| `npm run format:check`  | Prettier verification (`npm run format` rewrites in place)                |
+| `npm test`              | `node:test` unit tests + an HTTP integration test against a mock LLM      |
+| `npm run test:coverage` | Same suite with Node's experimental coverage reporter                     |
+| `npm run ci`            | All of the above in one shot                                              |
+
+The integration test spawns the real server on a free port in `3400-3459`, points it at a local mock
+of `/chat/completions`, and asserts health, 404/405 routing, report-language wiring, SSE frames,
+text extraction and path-traversal rejection. It needs no API key and no network.
 
 The frontend has no build step: edit `public/index.html`, refresh the page. The server sends
 `Cache-Control: no-store` for HTML, so changes appear immediately.

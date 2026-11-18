@@ -1,0 +1,13 @@
+services:
+  resume-optimizer:
+    build: .
+    image: resume-optimizer:local
+    container_name: resume-optimizer
+    ports:
+      - '127.0.0.1:3000:3000'
+    env_file:
+      - .env
+    environment:
+      HOST: 0.0.0.0
+      PORT: '3000'
+    restart: unless-stopped
