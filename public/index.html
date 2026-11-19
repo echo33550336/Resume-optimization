@@ -550,8 +550,15 @@
     try {
       const r = await fetch('/api/health');
       const j = await r.json();
-      $('health').textContent = j.hasKey ? T('health.ready', { model: j.model }) : T('health.noKey');
-      $('health').style.color = j.hasKey ? 'var(--ok)' : 'var(--warn)';
+      const offline = j.offline === true || j.mode === 'offline';
+      if (j.hasKey) {
+        $('health').textContent = T('health.ready', { model: j.model });
+        $('health').style.color = 'var(--ok)';
+      } else {
+        $('health').textContent = offline ? T('health.offline') : T('health.noKey');
+        $('health').style.color = 'var(--warn)';
+      }
+      window.__offlineMode = offline;
     } catch (e) {
       $('health').textContent = T('health.down');
       $('health').style.color = 'var(--danger)';
@@ -756,6 +763,7 @@
     let buffer = '';
     let meta = null;
     let usage = null;
+    let fallback = null;
     for (;;) {
       const step = await reader.read();
       if (step.done) break;
@@ -770,6 +778,8 @@
           scheduleRender();
         } else if (frame.event === 'done') {
           usage = (frame.data && frame.data.usage) || null;
+        } else if (frame.event === 'fallback') {
+          fallback = frame.data || {};
         } else if (frame.event === 'error') {
           const err = new Error(errorTextOf(frame.data && frame.data.code, frame.data && frame.data.error));
           err.code = frame.data && frame.data.code;
@@ -777,7 +787,7 @@
         }
       }
     }
-    return { meta, usage };
+    return { meta, usage, fallback };
   }
 
   function escapeHtml(value) {
@@ -846,6 +856,7 @@
     setStatus('status.generating');
     streamController = new AbortController();
     const started = Date.now();
+    let offlineNote = '';
     try {
       const response = await fetch('/api/optimize', {
         method: 'POST',
@@ -875,18 +886,36 @@
         currentMarkdown = payload.content || '';
         finishResult();
         const tokens = payload.usage && payload.usage.total_tokens ? `${payload.usage.total_tokens} tokens` : '';
-        setStatus('status.done', null, detailSuffix([payload.model, tokens]));
+        if (payload.offline) {
+          setStatus('status.offline', null, detailSuffix(['offline']));
+          offlineNote = payload.fallback
+            ? T('toast.offlineFallback', { code: (payload.warning && payload.warning.code) || 'UPSTREAM' })
+            : T('toast.offlineReport');
+        } else {
+          setStatus('status.done', null, detailSuffix([payload.model, tokens]));
+        }
       } else {
         const result = await readStream(response);
         finishResult();
         const seconds = ((Date.now() - started) / 1000).toFixed(1);
         const tokens = result.usage && result.usage.total_tokens ? `${result.usage.total_tokens} tokens` : '';
         const model = (result.meta && result.meta.model) || $('model').value;
-        setStatus('status.done', null, detailSuffix([model, tokens, `${seconds}s`]));
+        const offline = Boolean(result.meta && result.meta.offline);
+        if (offline) {
+          setStatus('status.offline', null, detailSuffix(['offline', `${seconds}s`]));
+          offlineNote = result.fallback
+            ? T('toast.offlineFallback', { code: result.fallback.code || 'UPSTREAM' })
+            : T('toast.offlineReport');
+        } else if (result.fallback) {
+          setStatus('status.done', null, detailSuffix([model, `${seconds}s`]));
+          offlineNote = T('toast.offlineFallback', { code: result.fallback.code || 'UPSTREAM' });
+        } else {
+          setStatus('status.done', null, detailSuffix([model, tokens, `${seconds}s`]));
+        }
       }
       window.__lastResult = currentMarkdown;
       setResultActions(Boolean(currentMarkdown));
-      showToast(T('toast.completed'));
+      showToast(offlineNote || T('toast.completed'));
     } catch (err) {
       finishResult();
       if (err.name === 'AbortError') {

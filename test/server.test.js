@@ -261,3 +261,116 @@ test('server integration', async (t) => {
     assert.equal(res.status, 403);
   });
 });
+
+test('offline mode works without an API key', async (t) => {
+  const app = await startApp({
+    LLM_API_KEY: '',
+    LLM_API_BASE: 'http://127.0.0.1:9',
+    LLM_RETRIES: '0',
+    LLM_TIMEOUT_MS: '1500',
+  });
+
+  t.after(() => {
+    app.child.kill();
+  });
+
+  const body = {
+    company: 'Acme',
+    position: '数据产品经理',
+    jd: '负责数据产品规划，熟悉 SQL、Python，有用户增长经验',
+    resume: '张三\n工作经历\n负责数据看板建设',
+    roleType: 'data',
+    lang: 'zh',
+  };
+
+  await t.test('health reports offline mode', async () => {
+    const res = await request(app.port, 'GET', '/api/health');
+    const json = JSON.parse(res.body);
+    assert.equal(json.hasKey, false);
+    assert.equal(json.mode, 'offline');
+    assert.equal(json.offline, true);
+  });
+
+  await t.test('non-streaming optimize returns the local report', async () => {
+    const res = await request(app.port, 'POST', '/api/optimize', { body });
+    assert.equal(res.status, 200);
+    const json = JSON.parse(res.body);
+    assert.equal(json.ok, true);
+    assert.equal(json.offline, true);
+    assert.equal(json.model, 'offline');
+    assert.match(json.content, /## 一、匹配度诊断/);
+    assert.ok(json.signals && typeof json.signals.score === 'number', 'signals should be exposed');
+    assert.ok(Array.isArray(json.signals.missing));
+  });
+
+  await t.test('streaming optimize streams the offline report', async () => {
+    const res = await request(app.port, 'POST', '/api/optimize', {
+      headers: { Accept: 'text/event-stream' },
+      body: { ...body, stream: true },
+    });
+    assert.equal(res.status, 200);
+    assert.match(res.body, /event: meta/);
+    assert.match(res.body, /"offline":true/);
+    assert.match(res.body, /event: delta/);
+    assert.match(res.body, /event: done/);
+    assert.ok(!res.body.includes('event: error'), 'offline stream must not error');
+    const text = [...res.body.matchAll(/event: delta\ndata: (\{.*?\})\n/g)]
+      .map((match) => JSON.parse(match[1]).content)
+      .join('');
+    assert.match(text, /匹配度诊断/);
+  });
+});
+
+test('upstream failure falls back to the offline report', async (t) => {
+  const app = await startApp({
+    LLM_API_KEY: 'test-key',
+    LLM_API_BASE: 'http://127.0.0.1:9',
+    LLM_RETRIES: '0',
+    LLM_TIMEOUT_MS: '1500',
+  });
+
+  t.after(() => {
+    app.child.kill();
+  });
+
+  const body = {
+    company: 'Acme',
+    position: 'Backend Engineer',
+    jd: 'Build Python services',
+    resume: '张三\n项目\n负责服务重构',
+    lang: 'zh',
+  };
+
+  await t.test('non-streaming returns 200 with a fallback flag', async () => {
+    const res = await request(app.port, 'POST', '/api/optimize', { body });
+    assert.equal(res.status, 200);
+    const json = JSON.parse(res.body);
+    assert.equal(json.ok, true);
+    assert.equal(json.fallback, true);
+    assert.equal(json.offline, true);
+    assert.ok(json.warning && json.warning.code, 'the upstream error code should be reported');
+    assert.match(json.content, /## 一、匹配度诊断/);
+  });
+
+  await t.test('streaming emits a fallback event before the local report', async () => {
+    const res = await request(app.port, 'POST', '/api/optimize', {
+      headers: { Accept: 'text/event-stream' },
+      body: { ...body, stream: true },
+    });
+    assert.equal(res.status, 200);
+    assert.match(res.body, /event: fallback/);
+    assert.match(res.body, /event: delta/);
+    assert.match(res.body, /"offline":true/);
+    assert.ok(!res.body.includes('event: error'), 'a recoverable upstream failure must not stream an error');
+  });
+
+  await t.test('offline:true forces the local report even with a key', async () => {
+    const res = await request(app.port, 'POST', '/api/optimize', {
+      body: { ...body, offline: true },
+    });
+    const json = JSON.parse(res.body);
+    assert.equal(json.offline, true);
+    assert.equal(json.fallback, undefined, 'forced offline is not a fallback');
+    assert.equal(json.model, 'offline');
+  });
+});

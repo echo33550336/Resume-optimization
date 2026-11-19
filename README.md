@@ -76,6 +76,41 @@ path reaches all of them. What the model actually is, is decided by `LLM_API_BAS
 - **Local-first and private** — nothing leaves your machine except the request to the LLM endpoint you configured.
 - **Hardened server** — LLM timeout with bounded retries, typed error codes, body/upload/text limits, localhost-only CORS, static path containment, security headers, graceful shutdown.
 - **Demo mode** — `POST /api/optimize` with `demo: true` (or open `/?demo=1`) replays a canned four-part report through the same SSE pipeline, so the UI can be tried with no key and no model call. A replay-only static page in [`docs/`](docs/index.html) is published to GitHub Pages.
+- **Offline report** — with no `LLM_API_KEY`, or when the upstream model times out / errors, the server answers with a locally generated four-part report instead of a 503/502 page, so the tool always returns something useful. See [Offline report](#offline-report).
+
+## Offline report
+
+`offline.js` is a rules engine, not a model: it reads the JD and the resume, and writes the same
+four-part report the LLM would (`一、匹配度诊断 / 二、优化后的简历 / 三、关键修改说明 / 四、待补充/风险提示`).
+
+<p align="center">
+  <img src="docs/assets/offline-mode.png" alt="Offline report generated with no API key" width="820">
+</p>
+
+It is used when:
+
+1. the server starts **without** `LLM_API_KEY` — every optimize request is served offline;
+2. the upstream model fails **before any text has been sent** (timeout, network error, 5xx, rate
+   limit, empty answer) — the request still returns `200` with the offline report plus a `warning`;
+3. the request asks for it explicitly with `"offline": true` (useful for tests and demos).
+
+What it actually does, with no dependencies and no network:
+
+- **Keyword coverage** — tokenises the JD (Chinese word segmentation via `Intl.Segmenter`, Latin
+  tech terms kept whole, `RAG/Agent` split, `A/B` kept), weights terms that appear in requirement
+  lines, and reports which ones the resume never mentions.
+- **Quantified impact** — counts bullets that carry a number; unquantified bullets get an explicit
+  `[请补充具体数字]` / `[add the exact number]` placeholder instead of an invented metric.
+- **Verb upgrades** — 负责/参与/协助/帮助 → 主导/参与并交付/协助并推进/推动 (and the English
+  equivalents), because the verb is what recruiters read as seniority.
+- **Structure** — recognises education / experience / projects / skills / awards sections, keeps
+  names, contacts, schools and skill lists verbatim, and rewrites only the experience bullets.
+- **Scoring** — a 0–100 match score weighted 45 % keyword coverage, 30 % quantification, 25 %
+  seniority/background fit, with the component scores exposed as `signals`.
+
+The offline report is deliberately **honest about its ceiling**: it is word- and structure-level
+analysis, it does not paraphrase, and the `四、待补充/风险提示` section says so. Configure an
+API key when you want the full semantic rewrite.
 
 ## How it works
 
@@ -123,6 +158,7 @@ path reaches all of them. What the model actually is, is decided by `LLM_API_BAS
 resume-optimizer/
 ├── server.js                  # HTTP server: routes, SSE streaming, static files, limits
 ├── prompt.js                  # system / user prompt builders (single source of truth)
+├── offline.js                 # rules engine: four-part report with no key and no model call
 ├── public/
 │   ├── index.html             # single-page UI: landing, optimizer, settings, export toolbar
 │   ├── i18n.js                # zh / en dictionary and DOM translation runtime
@@ -237,6 +273,8 @@ All JSON endpoints answer `{ "ok": true, ... }` on success and `{ "ok": false, "
   "ok": true,
   "model": "hunyuan-2.0-instruct-20251111",
   "hasKey": true,
+  "offline": true,
+  "mode": "llm",
   "streaming": true,
   "roleTypes": ["general", "tech", "product", "data", "ops", "design", "marketing"],
   "langs": ["zh", "en"],
@@ -271,7 +309,8 @@ Response: `{ "ok": true, "text": "...", "meta": { "filename": "resume.pdf", "ext
   "lang": "en",
   "outputLang": "zh",
   "model": "hunyuan-2.0-instruct-20251111",
-  "stream": true
+  "stream": true,
+  "offline": false
 }
 ```
 
@@ -279,13 +318,17 @@ Response: `{ "ok": true, "text": "...", "meta": { "filename": "resume.pdf", "ext
 - `outputLang` (optional) — `auto` | `zh` | `en`: the language the **report** is written in.
   `auto` (default) follows `lang`. Both `lang` and `outputLang` are echoed back (`lang` = report
   language actually used, `uiLang` = interface language), and in SSE the `meta` frame carries both.
+- `offline` (optional) — `true` forces the local rules engine even when a key is configured.
+  Without a key the offline report is served anyway, so this is mostly for tests and demos.
 
 - `stream: false` (default) — returns `{ "ok": true, "content": "...", "model": "...", "lang": "zh", "uiLang": "en", "usage": { ... }, "elapsedMs": 8421 }`.
+  Offline answers additionally carry `"offline": true`, `"model": "offline"`, `"signals": { ... }`,
+  and `"fallback": true` + `"warning": { "code": "...", "error": "..." }` when the model failed first.
 - `stream: true` or `Accept: text/event-stream` — returns `text/event-stream`:
 
 ```
 event: meta
-data: {"model":"hunyuan-2.0-instruct-20251111","roleType":"tech","lang":"zh","uiLang":"en","startedAt":"2026-01-01T00:00:00.000Z"}
+data: {"model":"hunyuan-2.0-instruct-20251111","offline":false,"roleType":"tech","lang":"zh","uiLang":"en","startedAt":"2026-01-01T00:00:00.000Z"}
 
 event: delta
 data: {"content":"## 1. Match diagnosis\n"}
@@ -294,32 +337,36 @@ event: delta
 data: {"content":"- Score: 78/100 ..."}
 
 event: done
-data: {"model":"hunyuan-2.0-instruct-20251111","usage":{"total_tokens":3120},"chars":4210,"elapsedMs":8421}
+data: {"model":"hunyuan-2.0-instruct-20251111","offline":false,"usage":{"total_tokens":3120},"chars":4210,"elapsedMs":8421}
 ```
+
+When the model fails before the first delta, the stream stays open: an `event: fallback` frame
+(`{"code":"UPSTREAM_TIMEOUT","error":"..."}`) arrives, followed by the offline report in the usual
+`delta` frames and a `done` frame with `"offline": true`.
 
 A comment frame `: ping` is sent every 15 seconds to keep idle connections alive. Failures after the
 stream has started arrive as `event: error` frames; failures before it arrive as plain JSON.
 
 ### Error codes
 
-| HTTP | `code`                                                                                                  | When                                                            |
-| ---- | ------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
-| 400  | `INVALID_JSON`                                                                                          | Body is not valid JSON                                          |
-| 400  | `INVALID_REQUEST`                                                                                       | Missing / empty required field                                  |
-| 400  | `TEXT_TOO_LONG`                                                                                         | Text exceeds `MAX_TEXT_CHARS`                                   |
-| 400  | `INVALID_BASE64`                                                                                        | Upload payload is not valid base64                              |
-| 404  | `NOT_FOUND`                                                                                             | Unknown API route                                               |
-| 405  | `METHOD_NOT_ALLOWED`                                                                                    | Wrong HTTP verb for the route                                   |
-| 413  | `BODY_TOO_LARGE`                                                                                        | Request body over `MAX_BODY_BYTES`                              |
-| 413  | `FILE_TOO_LARGE`                                                                                        | Upload over `MAX_EXTRACT_BYTES`                                 |
-| 415  | `UNSUPPORTED_TYPE`                                                                                      | File extension not supported                                    |
-| 422  | `EXTRACT_EMPTY`                                                                                         | Extraction produced no text                                     |
-| 429  | `UPSTREAM_RATE_LIMITED`                                                                                 | LLM endpoint rate-limited the request                           |
-| 502  | `UPSTREAM_NETWORK` / `UPSTREAM_ERROR` / `UPSTREAM_EMPTY` / `UPSTREAM_INVALID` / `UPSTREAM_STREAM_ERROR` | Upstream transport, status, empty or malformed answer           |
-| 503  | `NO_API_KEY`                                                                                            | Server has no `LLM_API_KEY`                                     |
-| 503  | `EXTRACTOR_UNAVAILABLE`                                                                                 | PDF / DOCX / OCR dependency not installed                       |
-| 504  | `UPSTREAM_TIMEOUT`                                                                                      | No answer within `LLM_TIMEOUT_MS`                               |
-| 499  | `CLIENT_CLOSED`                                                                                         | Browser disconnected (server-side only, not sent to the client) |
+| HTTP | `code`                                                                                                  | When                                                              |
+| ---- | ------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------- |
+| 400  | `INVALID_JSON`                                                                                          | Body is not valid JSON                                            |
+| 400  | `INVALID_REQUEST`                                                                                       | Missing / empty required field                                    |
+| 400  | `TEXT_TOO_LONG`                                                                                         | Text exceeds `MAX_TEXT_CHARS`                                     |
+| 400  | `INVALID_BASE64`                                                                                        | Upload payload is not valid base64                                |
+| 404  | `NOT_FOUND`                                                                                             | Unknown API route                                                 |
+| 405  | `METHOD_NOT_ALLOWED`                                                                                    | Wrong HTTP verb for the route                                     |
+| 413  | `BODY_TOO_LARGE`                                                                                        | Request body over `MAX_BODY_BYTES`                                |
+| 413  | `FILE_TOO_LARGE`                                                                                        | Upload over `MAX_EXTRACT_BYTES`                                   |
+| 415  | `UNSUPPORTED_TYPE`                                                                                      | File extension not supported                                      |
+| 422  | `EXTRACT_EMPTY`                                                                                         | Extraction produced no text                                       |
+| 429  | `UPSTREAM_RATE_LIMITED`                                                                                 | LLM endpoint rate-limited the request                             |
+| 502  | `UPSTREAM_NETWORK` / `UPSTREAM_ERROR` / `UPSTREAM_EMPTY` / `UPSTREAM_INVALID` / `UPSTREAM_STREAM_ERROR` | Upstream transport, status, empty or malformed answer             |
+| 503  | `NO_API_KEY`                                                                                            | Server has no `LLM_API_KEY` (served as an offline report instead) |
+| 503  | `EXTRACTOR_UNAVAILABLE`                                                                                 | PDF / DOCX / OCR dependency not installed                         |
+| 504  | `UPSTREAM_TIMEOUT`                                                                                      | No answer within `LLM_TIMEOUT_MS`                                 |
+| 499  | `CLIENT_CLOSED`                                                                                         | Browser disconnected (server-side only, not sent to the client)   |
 
 ## Security model
 
@@ -395,25 +442,32 @@ npm start          # run locally on http://127.0.0.1:3000
 
 Quality gates — the same commands CI runs:
 
-| Command                 | What it does                                                              |
-| ----------------------- | ------------------------------------------------------------------------- |
-| `npm run check`         | `node --check` on `server.js`, `prompt.js`, `public/i18n.js`              |
-| `npm run typecheck`     | `tsc --noEmit` with `allowJs`/`checkJs` — types come from JSDoc comments  |
-| `npm run lint`          | ESLint flat config: Node rules for the server/tests, browser rules for JS |
-| `npm run format:check`  | Prettier verification (`npm run format` rewrites in place)                |
-| `npm test`              | `node:test` unit tests + an HTTP integration test against a mock LLM      |
-| `npm run test:coverage` | Same suite with Node's experimental coverage reporter                     |
-| `npm run ci`            | All of the above in one shot                                              |
+| Command                 | What it does                                                                                 |
+| ----------------------- | -------------------------------------------------------------------------------------------- |
+| `npm run check`         | `node --check` on `server.js`, `prompt.js`, `demo-report.js`, `offline.js`, `public/i18n.js` |
+| `npm run typecheck`     | `tsc --noEmit` with `allowJs`/`checkJs` — types come from JSDoc comments                     |
+| `npm run lint`          | ESLint flat config: Node rules for the server/tests, browser rules for JS                    |
+| `npm run format:check`  | Prettier verification (`npm run format` rewrites in place)                                   |
+| `npm test`              | `node:test` unit tests + an HTTP integration test against a mock LLM                         |
+| `npm run test:coverage` | Same suite with Node's experimental coverage reporter                                        |
+| `npm run ci`            | All of the above in one shot                                                                 |
 
 The integration test spawns the real server on a free port in `3400-3459`, points it at a local mock
 of `/chat/completions`, and asserts health, 404/405 routing, report-language wiring, SSE frames,
 text extraction and path-traversal rejection. It needs no API key and no network.
+
+The offline suite (`test/offline.test.js`) covers the rules engine on its own: four-part headings in
+both languages, deterministic output, keyword matching, placeholders only on unquantified experience
+lines, verb upgrades, and the no-CJK rule for English reports. The integration suite also boots the
+server with no key (offline mode) and with a dead upstream (fallback mode) to prove that neither
+returns an error page.
 
 The frontend has no build step: edit `public/index.html`, refresh the page. The server sends
 `Cache-Control: no-store` for HTML, so changes appear immediately.
 
 ## Roadmap
 
+- [x] Offline report when there is no key or the model fails
 - [ ] Session history with saved comparisons
 - [ ] Multi-turn refinement of a single section
 - [ ] DOCX export with real formatting

@@ -11,6 +11,7 @@ module.exports = [
       'server.js',
       'prompt.js',
       'demo-report.js',
+      'offline.js',
       'scripts/**/*.js',
       'test/**/*.js',
       'eslint.config.js',

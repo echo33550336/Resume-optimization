@@ -25,6 +25,7 @@ const {
   normalizeOutputLang,
 } = require('./prompt');
 const { buildDemoReport } = require('./demo-report');
+const { buildOffline } = require('./offline');
 
 // ---------------------------------------------------------------------------
 // Environment
@@ -467,6 +468,9 @@ async function handleHealth(req, res) {
     ok: true,
     model: LLM_MODEL,
     hasKey: Boolean(LLM_API_KEY),
+    // `offline` is always available: it needs no key and no network.
+    offline: true,
+    mode: LLM_API_KEY ? 'llm' : 'offline',
     streaming: true,
     demo: true,
     roleTypes: ROLE_TYPES,
@@ -607,7 +611,23 @@ function normalizeOptimizeInput(body) {
     uiLang,
     model,
     demo: body.demo === true,
+    offline: body.offline === true,
   };
+}
+
+/** Upstream failures that happen before anything reached the client: safe to paper over. */
+const OFFLINE_FALLBACK_CODES = new Set([
+  'NO_API_KEY',
+  'UPSTREAM_TIMEOUT',
+  'UPSTREAM_NETWORK',
+  'UPSTREAM_ERROR',
+  'UPSTREAM_EMPTY',
+  'UPSTREAM_INVALID',
+  'UPSTREAM_RATE_LIMITED',
+]);
+
+function isOfflineFallbackError(err) {
+  return err instanceof HttpError && OFFLINE_FALLBACK_CODES.has(err.code);
 }
 
 async function handleOptimize(req, res) {
@@ -615,13 +635,22 @@ async function handleOptimize(req, res) {
   const input = normalizeOptimizeInput(body);
 
   const demo = input.demo;
-  if (!demo && !LLM_API_KEY) {
-    throw new HttpError(503, 'NO_API_KEY', '服务端未配置 LLM_API_KEY，请编辑 .env 后重启服务');
-  }
+  // Offline is the fallback when no key is configured; `offline: true` also forces it.
+  const offline = !demo && (input.offline || !LLM_API_KEY);
 
   const wantsStream = body.stream === true || String(req.headers.accept || '').includes('text/event-stream');
-  const model = demo ? 'demo' : input.model;
+  const model = demo ? 'demo' : offline ? 'offline' : input.model;
   const started = Date.now();
+  const report = () => buildOffline(input);
+  const publicSignals = (signals) => ({
+    score: signals.score,
+    keywordScore: signals.keywordScore,
+    quantScore: signals.quantScore,
+    levelScore: signals.levelScore,
+    quantifiedRatio: signals.quantifiedRatio,
+    matched: signals.matched,
+    missing: signals.missing,
+  });
 
   if (demo && !wantsStream) {
     const content = buildDemoReport({ lang: input.lang });
@@ -641,17 +670,59 @@ async function handleOptimize(req, res) {
   const messages = demo ? [] : buildMessages(input);
 
   if (!wantsStream) {
-    const { content, usage } = await callLlm({ messages, model: input.model, stream: false, clientRes: res });
-    sendJson(req, res, 200, {
-      ok: true,
-      content,
-      model: input.model,
-      lang: input.lang,
-      uiLang: input.uiLang,
-      usage,
-      elapsedMs: Date.now() - started,
-    });
-    return;
+    if (offline) {
+      const { content, signals } = report();
+      sendJson(req, res, 200, {
+        ok: true,
+        offline: true,
+        content,
+        model: 'offline',
+        lang: input.lang,
+        uiLang: input.uiLang,
+        usage: null,
+        signals: publicSignals(signals),
+        elapsedMs: Date.now() - started,
+      });
+      return;
+    }
+    try {
+      const { content, usage } = await callLlm({
+        messages,
+        model: input.model,
+        stream: false,
+        clientRes: res,
+      });
+      sendJson(req, res, 200, {
+        ok: true,
+        offline: false,
+        content,
+        model: input.model,
+        lang: input.lang,
+        uiLang: input.uiLang,
+        usage,
+        elapsedMs: Date.now() - started,
+      });
+      return;
+    } catch (err) {
+      // Nothing reached the client yet, so a useful local report beats an error toast.
+      if (!isOfflineFallbackError(err)) throw err;
+      log('[warn] model failed, serving the offline report:', sanitize(err.message));
+      const { content, signals } = report();
+      sendJson(req, res, 200, {
+        ok: true,
+        offline: true,
+        fallback: true,
+        warning: { code: err.code || 'UPSTREAM_ERROR', error: sanitize(err.message) },
+        content,
+        model: 'offline',
+        lang: input.lang,
+        uiLang: input.uiLang,
+        usage: null,
+        signals: publicSignals(signals),
+        elapsedMs: Date.now() - started,
+      });
+      return;
+    }
   }
 
   // ----- Server-Sent Events -----
@@ -681,6 +752,7 @@ async function handleOptimize(req, res) {
   sendEvent('meta', {
     model,
     demo,
+    offline,
     roleType: input.roleType,
     lang: input.lang,
     uiLang: input.uiLang,
@@ -697,31 +769,52 @@ async function handleOptimize(req, res) {
     }
   }, 15000);
 
+  /** Stream a finished string in small deltas so the UI keeps its typing effect. */
+  const streamText = async (text, delayMs = 8) => {
+    const chunkSize = 24;
+    for (let i = 0; i < text.length && !closed; i += chunkSize) {
+      sendEvent('delta', { content: text.slice(i, i + chunkSize) });
+      await new Promise((resolve) => setTimeout(resolve, delayMs));
+    }
+    return text;
+  };
+
   try {
     let content;
     let usage = null;
+    let usedOffline = offline;
     if (demo) {
       // Replay a canned report with the same SSE shape, so the UI can be tried without a key.
-      content = buildDemoReport({ lang: input.lang });
-      const chunkSize = 24;
-      for (let i = 0; i < content.length && !closed; i += chunkSize) {
-        sendEvent('delta', { content: content.slice(i, i + chunkSize) });
-        await new Promise((resolve) => setTimeout(resolve, 28));
-      }
+      content = await streamText(buildDemoReport({ lang: input.lang }), 28);
+    } else if (offline) {
+      content = await streamText(report().content);
     } else {
-      const result = await callLlm({
-        messages,
-        model: input.model,
-        stream: true,
-        clientRes: res,
-        onChunk: (delta) => sendEvent('delta', { content: delta }),
-      });
-      content = result.content;
-      usage = result.usage;
+      let emitted = false;
+      try {
+        const result = await callLlm({
+          messages,
+          model: input.model,
+          stream: true,
+          clientRes: res,
+          onChunk: (delta) => {
+            emitted = true;
+            sendEvent('delta', { content: delta });
+          },
+        });
+        content = result.content;
+        usage = result.usage;
+      } catch (err) {
+        if (emitted || !isOfflineFallbackError(err)) throw err;
+        usedOffline = true;
+        log('[warn] stream failed before any delta, serving the offline report:', sanitize(err.message));
+        sendEvent('fallback', { code: err.code, error: sanitize(err.message) });
+        content = await streamText(report().content);
+      }
     }
     sendEvent('done', {
-      model,
+      model: usedOffline ? 'offline' : model,
       demo,
+      offline: usedOffline,
       usage: usage || null,
       chars: content.length,
       elapsedMs: Date.now() - started,

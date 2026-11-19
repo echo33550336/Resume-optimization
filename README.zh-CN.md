@@ -68,8 +68,33 @@ README 里出现 "OpenAI-compatible"，指的是**报文格式**，不是厂商�
 - **中英双语界面** —— 一个按钮切换全部文案，选择记在 `localStorage`。
 - **报告语言独立** —— 界面是中文也能让模型用英文写报告，反之亦然（跟随界面 / 中文 / English）。
 - **演示模式** —— 请求里带 `demo: true`（或打开 `/?demo=1`）会用同一套 SSE 管线回放一份预置四段报告，不需要 key、也不调用模型；仓库里的 [`docs/`](docs/index.html) 静态回放页已发布到 GitHub Pages。
+- **离线兜底** —— 没配 `LLM_API_KEY`、或模型超时/报错时，服务端用本地规则生成同样结构的四段报告，而不是抛 503/502。详见[离线兜底](#离线兜底)。
 - **零框架后端** —— 只有一个 `server.js`，没有 Express、没有构建步骤、没有数据库。
-- **工程化齐备** —— TypeScript(JSDoc) 类型检查、ESLint + Prettier、19 个单元/集成测试、GitHub Actions 矩阵（Node 18/20/22 + Docker 构建）、非 root 容器镜像。
+- **工程化齐备** —— TypeScript(JSDoc) 类型检查、ESLint + Prettier、41 个单元/集成测试、GitHub Actions 矩阵（Node 18/20/22 + Docker 构建）、非 root 容器镜像。
+
+## 离线兜底
+
+`offline.js` 是一套本地规则引擎，不是模型：它读 JD 和简历，产出与模型同样的四段报告（一、匹配度诊断 / 二、优化后的简历 / 三、关键修改说明 / 四、待补充/风险提示）。
+
+<p align="center">
+  <img src="docs/assets/offline-mode.png" alt="没有 API Key 时生成的离线报告" width="820">
+</p>
+
+触发时机：
+
+1. 启动时**没有** `LLM_API_KEY` —— 所有优化请求都走离线报告；
+2. 上游模型在**发出任何正文之前**失败（超时、网络错误、5xx、限流、空回复）—— 请求仍返回 `200`，内容是离线报告，并附带 `warning`；
+3. 请求显式带 `"offline": true`（测试和演示用）。
+
+它具体做什么（零依赖、不联网）：
+
+- **关键词覆盖** —— 用 `Intl.Segmenter` 做中文分词、英文技术词整词保留（`RAG/Agent` 拆开、`A/B` 保留），对「要求/熟悉/掌握」这类需求行加权，算出 JD 里哪些词简历完全没提。
+- **成果量化** —— 统计带数字的 bullet；没有数字的 bullet 补 `[请补充具体数字]` 占位，而不是编一个数。
+- **动词升级** —— 负责/参与/协助/帮助 → 主导/参与并交付/协助并推进/推动（英文同理），因为 HR 靠动词判断层级。
+- **结构识别** —— 认出教育/经历/项目/技能/荣誉各块，姓名、联系方式、学校、技能列表原样保留，只改写经历 bullet。
+- **打分** —— 匹配度 = 45% 关键词覆盖 + 30% 量化 + 25% 背景匹配，各分项通过 `signals` 返回。
+
+离线报告会**如实说明自己的上限**：只做词面与结构分析、不做语义改写，第四段里会写明「配好 API Key 后再点优化可获得完整版」。
 
 ## 工作流程
 
@@ -104,6 +129,7 @@ README 里出现 "OpenAI-compatible"，指的是**报文格式**，不是厂商�
 Resume-optimization/
 ├── server.js              # 唯一后端：路由、限流、LLM 调用、SSE 转发
 ├── prompt.js              # 提示词唯一来源（中英双语 + 岗位类别 + 输出语言）
+├── offline.js             # 离线规则引擎：无需 key、无需模型也能出四段报告
 ├── public/
 │   ├── index.html         # 单页 UI（结构 + 样式 + 交互）
 │   ├── i18n.js            # 中英字典与运行时切换
@@ -200,13 +226,13 @@ LLM_MODEL=hunyuan-2.0-instruct-20251111                 # 默认模型
 
 所有 JSON 接口成功返回 `{ "ok": true, ... }`，失败返回 `{ "ok": false, "code": "...", "error": "..." }`。
 
-| 接口                 | 作用                                                                                                                             |
-| -------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| `GET /api/health`    | 服务状态、当前模型、是否有 key、可用解析器、限制值、支持的语言                                                                   |
-| `POST /api/extract`  | `{ filename, data(base64) }` → `{ text, meta }`，支持 txt/md/csv/pdf/docx/图片                                                   |
-| `POST /api/optimize` | `{ company, position, jd, resume, roleType, model, lang, outputLang }`；`stream: true` 或 `Accept: text/event-stream` 时返回 SSE |
+| 接口                 | 作用                                                                                                                                      |
+| -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET /api/health`    | 服务状态、当前模型、是否有 key、是否离线模式（`mode` / `offline`）、可用解析器、限制值、支持的语言                                        |
+| `POST /api/extract`  | `{ filename, data(base64) }` → `{ text, meta }`，支持 txt/md/csv/pdf/docx/图片                                                            |
+| `POST /api/optimize` | `{ company, position, jd, resume, roleType, model, lang, outputLang, offline }`；`stream: true` 或 `Accept: text/event-stream` 时返回 SSE |
 
-SSE 事件依次为 `meta`（模型 / 报告语言）→ 多个 `delta`（增量文本）→ `done`（用量与耗时）；出错时发 `error`。完整字段、错误码（16 个）与流式细节见英文版 [API 章节](README.md#api)。
+SSE 事件依次为 `meta`（模型 / 报告语言 / 是否离线）→ 多个 `delta`（增量文本）→ `done`（用量与耗时）；出错时发 `error`；模型在首个 delta 前失败时先发 `fallback`，随后用离线报告续上。离线响应带 `offline: true`、`model: "offline"`、`signals`；属于兜底时还有 `fallback: true` 与 `warning`。完整字段、错误码（16 个）与流式细节见英文版 [API 章节](README.md#api)。
 
 ## 安全模型
 
@@ -245,11 +271,11 @@ python scripts/build-media.py                         # demo.gif、social-previe
 
 ```bash
 npm run ci        # check → typecheck → lint → format:check → test
-npm run test      # 23 个测试：提示词 7 + i18n 4 + 预置报告 3 + 服务集成 9
+npm run test      # 41 个测试：提示词 7 + i18n 4 + 预置报告 3 + 离线引擎 10 + 服务集成 17
 npm run typecheck # tsc --noEmit（JSDoc 类型）
 ```
 
-集成测试会真实启动服务（端口 3400–3459 依次尝试）并配一个本地 mock LLM，不消耗任何 API 额度。
+集成测试会真实启动服务（端口 3400–3459 依次尝试）并配一个本地 mock LLM，不消耗任何 API 额度；另外会用「无 key」和「上游不可达」两种环境各起一次服务，验证离线兜底不返回错误页。
 
 ## 常见问题
 
@@ -290,6 +316,7 @@ TXT / MD / CSV 直接读；PDF 用 `pdf-parse`；DOCX 用 `mammoth`；图片走 
 
 ## 路线图
 
+- [x] 无 key / 模型故障时的离线兜底报告
 - [ ] 一键部署模板（Railway / Fly.io / Sealos）
 - [ ] 简历版本历史与对比
 - [ ] 更多输出模板（不同行业 / 校招 / 社招）
