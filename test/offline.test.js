@@ -147,3 +147,27 @@ test('empty resume still produces a usable report', () => {
   assert.equal(signals.bulletCount, 0);
   assert.equal(signals.quantifiedRatio, 0);
 });
+
+test('optimised resume keeps the original names and has no edge text', () => {
+  const content = buildOffline(zhInput()).content;
+  const resumeSection = content.split('## 二、优化后的简历')[1].split('## 三、')[0];
+  assert.ok(resumeSection.includes('某某大学 本科 计算机 2018-2022'), 'school line stays verbatim');
+  assert.ok(resumeSection.includes('SQL、Excel、Tableau'), 'skill names stay verbatim');
+  assert.ok(!resumeSection.includes('目标公司'), 'no target-company line inside the resume');
+  assert.ok(!resumeSection.includes('方向）'), 'no role-label aside next to the objective');
+  assert.ok(!resumeSection.includes('> 以上是结构改写'), 'no closing note inside the resume');
+});
+
+test('english optimised resume has no target-company line either', () => {
+  const { content } = buildOffline({
+    company: 'Acme',
+    position: 'Data Product Manager',
+    lang: 'en',
+    jd: 'Own the data product roadmap; SQL, Python',
+    resume: ['Zhang San', 'Education', 'Some University, BSc Computer Science', 'Skills', 'SQL'].join('\n'),
+  });
+  const resumeSection = content.split('## 2. Optimised Resume')[1].split('## 3. Key Changes')[0];
+  assert.ok(resumeSection.includes('Some University, BSc Computer Science'));
+  assert.ok(!resumeSection.includes('**Company**'), 'no company line inside the resume');
+  assert.ok(!resumeSection.includes('> Structure only'), 'no closing note inside the resume');
+});

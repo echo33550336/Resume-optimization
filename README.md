@@ -38,6 +38,11 @@ senior HR director returns a four-part report:
 3. **Change log** — the most important 5–8 edits and why each one matters.
 4. **Gaps and risks** — information the recruiter will ask for that the resume does not answer yet.
 
+Two hard rules, wired into the prompt and into the offline engine:
+
+- **Never rename anything.** Companies, schools, institutions, projects, products, technology names, awards, certificates and people keep their exact original spelling — no abbreviation, translation or rephrasing; only descriptions change. Exports also keep the original file name, with no `-optimized` or date suffix.
+- **Never add meaningless edge text.** No headers, footers, decorative labels, slogans or disclaimers, and no "optimised version / match score / for reference only" notes at the top, bottom or ends of paragraphs.
+
 The point is not "rewrite my bullets" — it is _diagnosis first, rewrite second_: the model must
 justify the score, then show exactly which text moved the score, then flag what is still missing.
 Text streams into the page as it is produced, so a 3,000-token rewrite becomes readable in seconds

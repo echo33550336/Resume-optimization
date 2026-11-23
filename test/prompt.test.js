@@ -83,6 +83,15 @@ test('user prompt carries the JD, the resume and the labels', () => {
   assert.match(zh, /岗位要求|岗位描述/);
 });
 
+test('system prompts forbid renaming and filler text', () => {
+  const zh = buildSystemPrompt('general', 'zh');
+  const en = buildSystemPrompt('general', 'en');
+  assert.match(zh, /专有名称/, 'zh prompt must protect proper names');
+  assert.match(zh, /不得添加与简历内容无关的文字/, 'zh prompt must forbid edge text');
+  assert.match(en, /Never rename/, 'en prompt must protect proper names');
+  assert.match(en, /Never add text that carries no information/, 'en prompt must forbid edge text');
+});
+
 test('buildMessages returns system + user in the requested language', () => {
   const messages = buildMessages({
     company: 'Acme',

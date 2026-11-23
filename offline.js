@@ -714,23 +714,23 @@ function renderBlocks(blocks, lang) {
 
 function renderResumeZh(signals, input) {
   const position = clean(input.position);
-  const company = clean(input.company);
   const out = [HEADINGS.zh.resume, ''];
-  out.push(`**求职意向**：${position || '目标岗位'}（${signals.roleLabel}方向）`);
-  if (company) out.push(`**目标公司**：${company}`);
+  // Only resume content goes in this section: no target-company line, no role
+  // label asides, no closing notes. Names, schools and dates stay verbatim.
+  out.push(`**求职意向**：${position || '目标岗位'}`);
   out.push('');
 
   const blocks = signals.blocks.length ? signals.blocks : [{ kind: 'content', lines: [] }];
   out.push(...renderBlocks(blocks, 'zh'));
-  out.push(
-    `> 以上是结构改写：动词升级 + 每条补量化占位，未改动任何事实；${HEADINGS.zh.placeholder} 需要你填真实数据。`
-  );
   out.push('');
   return out.join('\n');
 }
 
 function renderChangesZh(signals) {
   const items = [];
+  items.push(
+    '**保真边界** —— 公司、学校、机构、项目、产品、技术栈、奖项等名称一律照抄原文，没有缩写或换说法；只改描述、不加页眉页脚或「优化版」这类边角文字。'
+  );
   items.push(
     `**关键词覆盖 ${signals.keywordScore}%** —— 命中了 ${signals.matched.slice(0, 6).join('、') || '（几乎没有命中）'}。${
       signals.missing.length
@@ -816,22 +816,20 @@ function renderDiagnosisEn(signals) {
 
 function renderResumeEn(signals, input) {
   const position = clean(input.position);
-  const company = clean(input.company);
   const out = [HEADINGS.en.resume, ''];
-  out.push(`**Target** ${position || 'the role'} (${signals.roleLabel})`);
-  if (company) out.push(`**Company** ${company}`);
+  // Resume content only: no target-company line, no role label aside, no
+  // closing note. Names, schools and dates stay exactly as written.
+  out.push(`**Target** ${position || 'the role'}`);
   out.push('');
   const blocks = signals.blocks.length ? signals.blocks : [{ kind: 'content', lines: [] }];
   out.push(...renderBlocks(blocks, 'en'));
-  out.push(
-    `> Structure only: verbs upgraded and each line carries a placeholder — no facts were changed. ${HEADINGS.en.placeholder} is yours to fill in.`
-  );
   out.push('');
   return out.join('\n');
 }
 
 function renderChangesEn(signals) {
   const items = [
+    '**Fidelity boundary** — company, school, institution, project, product, technology and award names are copied exactly as written (no abbreviation, no rephrasing); only descriptions change, and no headers, footers or "optimised version" edge text is added.',
     `**Keyword coverage ${signals.keywordScore}%** — matched: ${signals.matched.slice(0, 6).join(', ') || '(almost nothing)'}.${
       signals.missing.length
         ? ` Add the highest-weight gaps (${signals.missing.slice(0, 5).join(', ')}) to skills or experience.`

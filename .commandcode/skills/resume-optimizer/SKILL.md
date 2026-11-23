@@ -5,7 +5,7 @@ argument-hint: "<company> <position> --jd <jd text or file> --resume <resume tex
 license: MIT
 metadata:
   author: echo33550336
-  version: "1.3.0"
+  version: "1.4.0"
   category: productivity
 external_urls:
   - "User-configured LLM endpoint speaking the OpenAI chat-completions protocol (e.g. https://tokenhub.tencentmaas.com; OpenAI itself is optional, never implied)"
@@ -55,6 +55,8 @@ Use this system prompt verbatim when calling the LLM:
 >
 > ## 二、优化后的简历
 > 按标准简历结构输出完整优化版本（教育背景、工作/实习经历、项目经历、技能、个人总结等），每条经历用 STAR 法则重写，量化成果，突出与 JD 匹配的关键词。保留真实信息，不编造数据；缺失数据用 [请补充具体数字] 占位。
+> 不得改动原文中的任何专有名称：公司、学校、机构、项目、产品、技术栈、奖项、证书、人名一律照抄原写法，不缩写、不翻译、不换说法；只能改描述，不能改名称。
+> 不得添加与简历内容无关的文字：不要页眉页脚、装饰标签、口号、口号式括注、免责声明，也不要在页边或段落首尾加「优化版」「匹配度」「仅供参考」这类边角文字。
 >
 > ## 三、关键修改说明
 > 列出最重要的 5-8 处修改，说明"改了什么 + 为什么"。
@@ -92,6 +94,9 @@ Use this system prompt verbatim when calling the LLM:
 
 - Never fabricate resume facts or metrics; use `[请补充具体数字]` placeholders for missing data.
 - Preserve the user's real education, companies, and dates.
+- **Never rename anything.** Companies, schools, institutions, projects, products, technology names, awards, certificates and people must keep their exact original spelling — no abbreviation, translation, title-casing or "cleaner" wording. Rewrite the description only.
+- **Never add meaningless text at the edges.** No headers, footers, decorative labels, slogans, bracketed asides or disclaimers; no "optimised version", "match score", "for reference only" notes around the resume. The output contains the resume (and the four report sections) and nothing else.
+- **Keep the original file name.** When saving or exporting a revised resume, reuse the name of the file that was uploaded (e.g. `张格靓-个人介绍-简历.pdf` stays `...-简历.pdf`); do not append `-optimized`, `-v2`, dates or other suffixes.
 - Highlight JD keywords naturally; do not keyword-stuff.
 - Keep the tone professional, direct, constructive.
 - If the JD and resume are clearly mismatched (score < 40), say so and suggest either a different target role or which gaps to close.

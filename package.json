@@ -1,6 +1,6 @@
 {
   "name": "resume-optimizer",
-  "version": "1.6.0",
+  "version": "1.6.1",
   "description": "Self-hosted resume optimizer that streams rewrites from any endpoint speaking the OpenAI chat-completions protocol (Tencent Hunyuan by default); bilingual UI, independent report language",
   "main": "server.js",
   "scripts": {
