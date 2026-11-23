@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN" data-theme="brand" data-font="default" data-bg="image">
+<html lang="zh-CN" data-theme="brand" data-font="default" data-bg="none">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -11,12 +11,12 @@
   :root { --radius: 12px; --radius-sm: 8px; --radius-lg: 18px; }
 
   [data-theme="brand"] {
-    --bg: #f0eadc; --bg-grad: radial-gradient(1200px 700px at 15% -5%, rgba(212,175,55,0.14) 0%, transparent 55%), radial-gradient(1000px 600px at 85% 10%, rgba(184,134,11,0.10) 0%, transparent 60%), linear-gradient(180deg, #f0eadc 0%, #e8e0cc 100%);
-    --panel: #fffdf7; --panel2: #f5efe0; --border: #e6ddc4;
-    --text: #2a2416; --muted: #6b5e3e;
-    --accent: #b8860b; --accent-soft: #f3e9c8; --accent2: #d4af37;
+    --bg: #ffffff; --bg-grad: none;
+    --panel: #ffffff; --panel2: #f6f7f9; --border: #e3e6ea;
+    --text: #1f2328; --muted: #5d646f;
+    --accent: #b8860b; --accent-soft: #fdf4de; --accent2: #d4af37;
     --warn: #c0392b; --ok: #b8860b; --danger: #c0392b;
-    --shadow: 0 6px 24px rgba(184,134,11,0.12); --header-bg: rgba(255,253,247,0.85);
+    --shadow: 0 6px 24px rgba(15,23,42,0.07); --header-bg: rgba(255,255,255,0.88);
   }
   [data-theme="job51"] {
     --bg: #f0eadc; --bg-grad: radial-gradient(1200px 700px at 15% -5%, rgba(212,175,55,0.12) 0%, transparent 55%), radial-gradient(1000px 600px at 85% 10%, rgba(200,120,30,0.10) 0%, transparent 60%), linear-gradient(180deg, #f0eadc 0%, #e8e0cc 100%);
@@ -262,7 +262,7 @@
     <div class="feat"><div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/></svg></div><h3 data-i18n="feat.jd.title">JD 精准匹配</h3><p data-i18n="feat.jd.body">基于岗位要求深度分析，突出与 JD 高度相关的经历与关键词。</p></div>
     <div class="feat"><div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></div><h3 data-i18n="feat.star.title">STAR 法则重写</h3><p data-i18n="feat.star.body">每条经历用 STAR 法则重写，量化成果，告别空洞描述。</p></div>
     <div class="feat"><div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="20" x2="4" y2="10"/><line x1="10" y1="20" x2="10" y2="4"/><line x1="16" y1="20" x2="16" y2="14"/><line x1="22" y1="20" x2="22" y2="8"/></svg></div><h3 data-i18n="feat.score.title">匹配度评分</h3><p data-i18n="feat.score.body">0-100 分匹配度诊断，附带具体改进理由。</p></div>
-    <div class="feat"><div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r="2.5"/><path d="M17.5 10.5c1.5 0 3 .5 4 2"/><circle cx="6" cy="13" r="3"/><path d="M2 21c0-3 2-5 4-5s4 2 4 5"/><path d="M14 21c0-2 1.5-3.5 3.5-3.5S21 19 21 21"/></svg></div><h3 data-i18n="feat.theme.title">主题可切换</h3><p data-i18n="feat.theme.body">金色 / 琥珀金 / 暗金，字体与背景自由选。</p></div>
+    <div class="feat"><div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r="2.5"/><path d="M17.5 10.5c1.5 0 3 .5 4 2"/><circle cx="6" cy="13" r="3"/><path d="M2 21c0-3 2-5 4-5s4 2 4 5"/><path d="M14 21c0-2 1.5-3.5 3.5-3.5S21 19 21 21"/></svg></div><h3 data-i18n="feat.theme.title">主题可切换</h3><p data-i18n="feat.theme.body">白色 / 琥珀金 / 暗金，字体与背景自由选。</p></div>
     <div class="feat"><div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div><h3 data-i18n="feat.speed.title">秒级生成</h3><p data-i18n="feat.speed.body">大模型驱动，几秒输出完整优化简历。</p></div>
     <div class="feat"><div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 6v6c0 5 3.5 9.5 8 10 4.5-.5 8-5 8-10V6z"/><path d="m9 12 2 2 4-4"/></svg></div><h3 data-i18n="feat.privacy.title">隐私安全</h3><p data-i18n="feat.privacy.body">简历仅在本地与模型间传输，不存储。</p></div>
   </section>
@@ -277,7 +277,7 @@
       <div class="tech-card"><div class="ticon">O</div><div><div class="tname" data-i18n="tech.ocr.name">Tesseract.js</div><div class="tdesc" data-i18n="tech.ocr.body">图片 OCR（中英）</div></div></div>
       <div class="tech-card"><div class="ticon">UI</div><div><div class="tname" data-i18n="tech.vanilla.name">原生 HTML/CSS/JS</div><div class="tdesc" data-i18n="tech.vanilla.body">无前端框架，轻量</div></div></div>
       <div class="tech-card"><div class="ticon">MD</div><div><div class="tname" data-i18n="tech.md.name">Markdown</div><div class="tdesc" data-i18n="tech.md.body">结构化输出渲染</div></div></div>
-      <div class="tech-card"><div class="ticon">⚙</div><div><div class="tname" data-i18n="tech.theme.name">主题系统</div><div class="tdesc" data-i18n="tech.theme.body">金色/字体/背景可切换</div></div></div>
+      <div class="tech-card"><div class="ticon">⚙</div><div><div class="tname" data-i18n="tech.theme.name">主题系统</div><div class="tdesc" data-i18n="tech.theme.body">白色/字体/背景可切换</div></div></div>
     </div>
   </section>
 
@@ -381,7 +381,7 @@
     <div class="group">
       <label data-i18n="settings.theme">主题风格</label>
       <div class="theme-options">
-        <div class="theme-card" data-theme="brand"><div class="theme-swatch" style="background:linear-gradient(135deg,#b8860b,#d4af37)"></div><span data-i18n="theme.brand">金色</span></div>
+        <div class="theme-card" data-theme="brand"><div class="theme-swatch" style="background:linear-gradient(135deg,#ffffff 56%,#d4af37 56%)"></div><span data-i18n="theme.brand">白色</span></div>
         <div class="theme-card" data-theme="job51"><div class="theme-swatch" style="background:linear-gradient(135deg,#a0780a,#d4af37)"></div><span data-i18n="theme.job51">琥珀金</span></div>
         <div class="theme-card" data-theme="dark"><div class="theme-swatch" style="background:linear-gradient(135deg,#d4af37,#f5d061)"></div><span data-i18n="theme.dark">暗金</span></div>
       </div>
@@ -389,7 +389,7 @@
     <div class="group">
       <label data-i18n="settings.bg">背景图案</label>
       <div class="bg-options">
-        <div class="bg-card" data-bg="none"><div class="bg-preview" style="background:#f0eadc"></div><span data-i18n="bg.none">无</span></div>
+        <div class="bg-card" data-bg="none"><div class="bg-preview" style="background:#ffffff"></div><span data-i18n="bg.none">无</span></div>
         <div class="bg-card" data-bg="dots"><div class="bg-preview" style="background:radial-gradient(circle,#b8860b 1px,transparent 1px);background-size:8px 8px"></div><span data-i18n="bg.dots">点阵</span></div>
         <div class="bg-card" data-bg="grid"><div class="bg-preview" style="background:linear-gradient(#e2d6b0 1px,transparent 1px),linear-gradient(90deg,#e2d6b0 1px,transparent 1px);background-size:8px 8px"></div><span data-i18n="bg.grid">网格</span></div>
         <div class="bg-card" data-bg="image"><div class="bg-preview" style="background:url(/bg.svg);background-size:cover"></div><span data-i18n="bg.image">背景图</span></div>
@@ -441,7 +441,7 @@
   function applySettings(s) {
     const theme = s.theme || 'brand';
     const font = s.font || 'default';
-    const bg = s.bg || 'image';
+    const bg = s.bg || 'none';
     document.documentElement.setAttribute('data-theme', theme);
     document.documentElement.setAttribute('data-font', font);
     document.documentElement.setAttribute('data-bg', bg);

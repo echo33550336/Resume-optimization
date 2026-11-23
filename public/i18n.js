@@ -49,7 +49,7 @@
     'feat.score.title': 'Match score',
     'feat.score.body': 'A 0–100 diagnosis with concrete reasons behind the number.',
     'feat.theme.title': 'Themeable',
-    'feat.theme.body': 'Gold, amber or dark; pick a font and a background that suits you.',
+    'feat.theme.body': 'White, amber or dark; pick a font and a background that suits you.',
     'feat.speed.title': 'Seconds, not minutes',
     'feat.speed.body':
       'Streamed from an LLM — the first section shows up while the rest is still generating.',
@@ -74,7 +74,7 @@
     'tech.md.name': 'Markdown',
     'tech.md.body': 'Structured result rendering',
     'tech.theme.name': 'Theme system',
-    'tech.theme.body': 'Gold, font and background switcher',
+    'tech.theme.body': 'White theme, font and background switcher',
 
     'section.hl.title': 'Highlights',
     'section.hl.body': 'Not just wording — a systematic rewrite for the target role',
@@ -149,7 +149,7 @@
     'settings.theme': 'Theme',
     'settings.bg': 'Background',
     'settings.font': 'Font',
-    'theme.brand': 'Gold',
+    'theme.brand': 'White',
     'theme.job51': 'Amber',
     'theme.dark': 'Dark',
     'bg.none': 'None',
