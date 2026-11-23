@@ -77,7 +77,7 @@ path reaches all of them. What the model actually is, is decided by `LLM_API_BAS
 - **Job-family focus** — tech, product, data, ops, design, marketing, general: each carries its own optimization bias.
 - **Bilingual UI (Chinese / English)** — one click switches every label; the choice is remembered in `localStorage`.
 - **Report language is independent** — the model can answer in Chinese or English regardless of the interface language (`Follow interface` / `Chinese` / `English`).
-- **Theme system** — brand gold / amber / dark, four fonts, four background patterns, persisted in `localStorage`.
+- **Theme system** — white / amber / dark, four fonts, four background patterns, persisted in `localStorage`.
 - **Local-first and private** — nothing leaves your machine except the request to the LLM endpoint you configured.
 - **Hardened server** — LLM timeout with bounded retries, typed error codes, body/upload/text limits, localhost-only CORS, static path containment, security headers, graceful shutdown.
 - **Demo mode** — `POST /api/optimize` with `demo: true` (or open `/?demo=1`) replays a canned four-part report through the same SSE pipeline, so the UI can be tried with no key and no model call. A replay-only static page in [`docs/`](docs/index.html) is published to GitHub Pages.
