@@ -127,6 +127,7 @@ const MIME = {
   '.webp': 'image/webp',
   '.ico': 'image/x-icon',
   '.txt': 'text/plain; charset=utf-8',
+  '.webmanifest': 'application/manifest+json; charset=utf-8',
 };
 
 /** Strip the API key out of anything we echo back to the client. */
@@ -863,11 +864,18 @@ function serveStatic(req, res) {
     }
     const ext = path.extname(filePath).toLowerCase();
     const isDocument = ext === '.html';
+    // The service worker must revalidate on every load so updates propagate;
+    // the manifest may be cached like any other static asset.
+    const cacheControl = isDocument
+      ? 'no-store'
+      : ext === '.js' && filePath.endsWith('sw.js')
+        ? 'no-cache'
+        : 'public, max-age=3600';
     res.writeHead(200, {
       ...securityHeaders(),
       'Content-Type': MIME[ext] || 'application/octet-stream',
       'Content-Length': stat.size,
-      'Cache-Control': isDocument ? 'no-store' : 'public, max-age=3600',
+      'Cache-Control': cacheControl,
     });
     if (req.method === 'HEAD') {
       res.end();

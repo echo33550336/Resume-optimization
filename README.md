@@ -78,6 +78,8 @@ path reaches all of them. What the model actually is, is decided by `LLM_API_BAS
 - **Bilingual UI (Chinese / English)** — one click switches every label; the choice is remembered in `localStorage`.
 - **Report language is independent** — the model can answer in Chinese or English regardless of the interface language (`Follow interface` / `Chinese` / `English`).
 - **Theme system** — white / amber / dark, four fonts, four background patterns, persisted in `localStorage`.
+- **Editorial UI 2.0** — warm-paper / champagne-gold design with serif display headings and a hairline feature grid; the landing page runs a live streaming-generation preview card, and the optimizer shows a four-stage pipeline bar, a match-score ring and live character/second stats while generating.
+- **Installable app (PWA)** — web manifest, service worker and maskable icons: install to desktop or phone straight from the browser and it opens in a standalone window; the app shell keeps working offline.
 - **Local-first and private** — nothing leaves your machine except the request to the LLM endpoint you configured.
 - **Hardened server** — LLM timeout with bounded retries, typed error codes, body/upload/text limits, localhost-only CORS, static path containment, security headers, graceful shutdown.
 - **Demo mode** — `POST /api/optimize` with `demo: true` (or open `/?demo=1`) replays a canned four-part report through the same SSE pipeline, so the UI can be tried with no key and no model call. A replay-only static page in [`docs/`](docs/index.html) is published to GitHub Pages.
@@ -167,6 +169,9 @@ resume-optimizer/
 ├── public/
 │   ├── index.html             # single-page UI: landing, optimizer, settings, export toolbar
 │   ├── i18n.js                # zh / en dictionary and DOM translation runtime
+│   ├── manifest.webmanifest   # PWA manifest: name, theme colors, icons
+│   ├── sw.js                  # service worker: precached shell, offline fallback
+│   ├── icons/                 # PWA icons (192 / 512, regular + maskable)
 │   ├── logo.svg
 │   └── bg.svg
 ├── test/
@@ -200,7 +205,7 @@ npm install              # optional — only needed for PDF / DOCX / image extra
 cp .env.example .env     # then set LLM_API_KEY (and LLM_API_BASE if not Tencent Hunyuan)
 
 npm start                # http://127.0.0.1:3000
-npm run check            # syntax check for server.js, prompt.js and public/i18n.js
+npm run check            # syntax check: server.js, prompt.js, demo-report.js, offline.js, public/*.js
 ```
 
 Without `npm install` the app still runs: text pasting works, uploads answer with a clear
@@ -209,6 +214,11 @@ Without `npm install` the app still runs: text pasting works, uploads answer wit
 Want to look before configuring anything? Open <http://127.0.0.1:3000/?demo=1> (or click **Try a demo**
 in the form) to replay a canned report with no key and no model call. The same replay, as a static
 page, is the [GitHub Pages demo](https://echo33550336.github.io/Resume-optimization/).
+
+**Install as an app:** open the app in Chrome or Edge (desktop, or Android via HTTPS) and click the
+install icon in the address bar — or the install button that appears in the header. It runs in a
+standalone window from the manifest and service worker in `public/`, and the shell still opens with
+no network.
 
 ### Minimal `.env`
 
@@ -447,15 +457,15 @@ npm start          # run locally on http://127.0.0.1:3000
 
 Quality gates — the same commands CI runs:
 
-| Command                 | What it does                                                                                 |
-| ----------------------- | -------------------------------------------------------------------------------------------- |
-| `npm run check`         | `node --check` on `server.js`, `prompt.js`, `demo-report.js`, `offline.js`, `public/i18n.js` |
-| `npm run typecheck`     | `tsc --noEmit` with `allowJs`/`checkJs` — types come from JSDoc comments                     |
-| `npm run lint`          | ESLint flat config: Node rules for the server/tests, browser rules for JS                    |
-| `npm run format:check`  | Prettier verification (`npm run format` rewrites in place)                                   |
-| `npm test`              | `node:test` unit tests + an HTTP integration test against a mock LLM                         |
-| `npm run test:coverage` | Same suite with Node's experimental coverage reporter                                        |
-| `npm run ci`            | All of the above in one shot                                                                 |
+| Command                 | What it does                                                                                                 |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `npm run check`         | `node --check` on `server.js`, `prompt.js`, `demo-report.js`, `offline.js`, `public/i18n.js`, `public/sw.js` |
+| `npm run typecheck`     | `tsc --noEmit` with `allowJs`/`checkJs` — types come from JSDoc comments                                     |
+| `npm run lint`          | ESLint flat config: Node rules for the server/tests, browser rules for JS                                    |
+| `npm run format:check`  | Prettier verification (`npm run format` rewrites in place)                                                   |
+| `npm test`              | `node:test` unit tests + an HTTP integration test against a mock LLM                                         |
+| `npm run test:coverage` | Same suite with Node's experimental coverage reporter                                                        |
+| `npm run ci`            | All of the above in one shot                                                                                 |
 
 The integration test spawns the real server on a free port in `3400-3459`, points it at a local mock
 of `/chat/completions`, and asserts health, 404/405 routing, report-language wiring, SSE frames,

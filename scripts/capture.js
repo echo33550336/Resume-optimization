@@ -147,7 +147,17 @@ async function main() {
 
     // 1) landing page
     await client.send('Page.navigate', { url: BASE + '/' });
-    await sleep(1500);
+    await sleep(1200);
+    // wait until the app script has executed (page globals become available)
+    const tw = Date.now();
+    let ready = false;
+    while (Date.now() - tw < 15000) {
+      ready = await evaluate("typeof showView === 'function' && typeof RI18N !== 'undefined'");
+      if (ready) break;
+      await sleep(250);
+    }
+    if (!ready) throw new Error('app globals never became available');
+    await sleep(800); // hero demo boot + health fetch settle
     await evaluate(
       "document.getElementById('health') && (document.getElementById('health').textContent = '\\u25cf demo ready')"
     );

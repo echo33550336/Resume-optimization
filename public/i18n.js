@@ -27,6 +27,8 @@
     'nav.optimizer': 'Optimize',
     'health.checking': '● Checking…',
     'aria.settings': 'Appearance settings',
+    'aria.install': 'Install app',
+    'kbd.hint': 'to start',
     'aria.logo': 'Resume Optimizer',
     'aria.lang': 'Language',
 
@@ -36,10 +38,26 @@
       'Paste a job description and your resume. An AI acting as a 10-year HR director returns a match diagnosis, a rewritten resume, key change notes and open questions. Three minutes to a stronger application.',
     'hero.cta.optimize': 'Start optimizing',
     'hero.cta.example': 'See an example',
+    'hero.badge': 'Self-hosted · MIT · Streaming output',
+    'trust.local': 'Data stays on this machine',
+    'trust.mit': 'MIT open source',
+    'trust.stream': 'SSE streaming',
+    'trust.pwa': 'Installable app',
+    'demo.card.title': 'Live generation preview',
 
     // landing sections
+    'stats.1.label': 'report sections: diagnosis / rewrite / notes / risks',
+    'stats.2.label': 'frontend dependencies — vanilla HTML/CSS/JS',
+    'stats.3.label': 'to the first streamed section',
+    'stats.4.label': 'local & private deployment, nothing stored',
+    'section.core.kicker': 'Core capabilities',
     'section.core.title': 'What it does',
     'section.core.body': 'The full path from diagnosis to a ready-to-send resume',
+    'feat.app.title': 'Installable app',
+    'feat.app.body': 'One click installs it to your desktop or phone (PWA) and it opens in its own window.',
+    'feat.lang.title': 'Bilingual UI',
+    'feat.lang.body':
+      'Switch the interface between Chinese and English; the report language is a separate choice.',
     'feat.jd.title': 'JD-aware targeting',
     'feat.jd.body':
       'Deep analysis of the role: every bullet highlights the experience and keywords the JD is really asking for.',
@@ -57,6 +75,7 @@
     'feat.privacy.body':
       'Your resume travels only between this machine and the model you configure. Nothing is stored.',
 
+    'section.tech.kicker': 'Tech stack',
     'section.tech.title': 'Stack',
     'section.tech.body': 'Zero-framework backend plus pluggable document extraction',
     'tech.node.name': 'Node.js',
@@ -73,9 +92,10 @@
     'tech.vanilla.body': 'No frontend framework, lightweight',
     'tech.md.name': 'Markdown',
     'tech.md.body': 'Structured result rendering',
-    'tech.theme.name': 'Theme system',
-    'tech.theme.body': 'White theme, font and background switcher',
+    'tech.pwa.name': 'PWA',
+    'tech.pwa.body': 'Installable, offline shell caching',
 
+    'section.hl.kicker': 'Highlights',
     'section.hl.title': 'Highlights',
     'section.hl.body': 'Not just wording — a systematic rewrite for the target role',
     'hl.match.title': 'Match diagnosis',
@@ -87,6 +107,7 @@
     'hl.privacy.title': 'Private by design',
     'hl.privacy.body': 'Sent only between you and the model — never written to a database.',
 
+    'steps.kicker': 'How it works',
     'steps.title': 'Three steps to a better resume',
     'step1.title': 'Paste the JD',
     'step1.body': 'Add the role and its requirements',
@@ -136,6 +157,12 @@
 
     // result
     'result.title': 'Result',
+    'result.scoreLabel': 'Match score',
+    'result.stats': '{chars} chars · {secs}s',
+    'pipe.stage1': 'Diagnosis',
+    'pipe.stage2': 'Rewrite',
+    'pipe.stage3': 'Notes',
+    'pipe.stage4': 'Risks',
     'action.stop': 'Stop',
     'action.copy': 'Copy text',
     'action.copyMd': 'Copy Markdown',
@@ -163,7 +190,20 @@
     'btn.save': 'Save',
     'btn.close': 'Close',
 
+    // landing cta + footer
+    'section.cta.title': 'Three minutes to a stronger application',
+    'section.cta.body':
+      'Paste, generate, copy. What comes back is a resume rewritten for the role — with a match diagnosis to back it up.',
+    'section.cta.btn': 'Start optimizing now',
+    'footer.note': 'Resume Optimizer · MIT License · Native Node.js · no tracking',
+    'footer.repo': 'Self-hosted: one docker command and it runs',
+
     // dynamic
+    'demo.stage.diagnose': 'Diagnosing match…',
+    'demo.stage.rewrite': 'Rewriting resume…',
+    'demo.stage.notes': 'Writing change notes…',
+    'demo.stage.done': 'Done',
+    'toast.installed': 'App installed — find it in your launcher',
     'status.needInput': 'Please fill in both the JD and the resume',
     'status.generating': 'Generating — output appears live…',
     'status.done': 'Done',
@@ -221,7 +261,14 @@
 
   // Chinese originals for strings produced by JavaScript (static markup keeps its own Chinese).
   const ZH = {
+    'kbd.hint': '快速开始',
     'app.title': '职优简历 · AI 智能优化系统',
+    'demo.stage.diagnose': '正在诊断匹配度…',
+    'demo.stage.rewrite': '正在重写简历…',
+    'demo.stage.notes': '正在整理修改说明…',
+    'demo.stage.done': '生成完成',
+    'result.stats': '{chars} 字 · {secs}s',
+    'toast.installed': '应用已安装，可在桌面或启动台打开',
     'status.needInput': '请填写 JD 和简历',
     'status.generating': 'AI 正在生成，输出会实时显示…',
     'status.done': '完成',

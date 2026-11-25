@@ -72,10 +72,12 @@ README 里出现 "OpenAI-compatible"，指的是**报文格式**，不是厂商�
 - **岗位类别聚焦** —— 技术 / 产品 / 数据 / 运营 / 设计 / 市场 / 通用，每类有不同的优化侧重。
 - **中英双语界面** —— 一个按钮切换全部文案，选择记在 `localStorage`。
 - **报告语言独立** —— 界面是中文也能让模型用英文写报告，反之亦然（跟随界面 / 中文 / English）。
+- **编辑级 UI 2.0** —— 暖纸白 / 香槟金配色 + 衬线大标题 + hairline 网格排版；首页内嵌「实时生成演示卡」打字机动画，优化页生成时显示四段流水线进度、匹配分环形图与字数/耗时统计。
+- **可安装为 App（PWA）** —— web manifest + Service Worker + 自适应图标：在 Chrome / Edge 里一键安装到桌面或手机，独立窗口运行，外壳支持离线打开。
 - **演示模式** —— 请求里带 `demo: true`（或打开 `/?demo=1`）会用同一套 SSE 管线回放一份预置四段报告，不需要 key、也不调用模型；仓库里的 [`docs/`](docs/index.html) 静态回放页已发布到 GitHub Pages。
 - **离线兜底** —— 没配 `LLM_API_KEY`、或模型超时/报错时，服务端用本地规则生成同样结构的四段报告，而不是抛 503/502。详见[离线兜底](#离线兜底)。
 - **零框架后端** —— 只有一个 `server.js`，没有 Express、没有构建步骤、没有数据库。
-- **工程化齐备** —— TypeScript(JSDoc) 类型检查、ESLint + Prettier、41 个单元/集成测试、GitHub Actions 矩阵（Node 18/20/22 + Docker 构建）、非 root 容器镜像。
+- **工程化齐备** —— TypeScript(JSDoc) 类型检查、ESLint + Prettier、45 个单元/集成测试、GitHub Actions 矩阵（Node 18/20/22 + Docker 构建）、非 root 容器镜像。
 
 ## 离线兜底
 
@@ -138,10 +140,13 @@ Resume-optimization/
 ├── public/
 │   ├── index.html         # 单页 UI（结构 + 样式 + 交互）
 │   ├── i18n.js            # 中英字典与运行时切换
+│   ├── manifest.webmanifest # PWA 清单（名称、主题色、图标）
+│   ├── sw.js              # Service Worker：预缓存外壳 + 离线兜底
+│   ├── icons/             # PWA 图标（192/512，普通 + maskable）
 │   ├── logo.svg
 │   └── bg.svg
 ├── test/                  # node:test 单元与集成测试
-├── docs/                  # 录制与发布素材指南
+├── docs/                  # GitHub Pages 演示回放页与发布素材
 ├── .github/workflows/     # CI 与容器镜像发布
 ├── Dockerfile
 ├── docker-compose.yml
@@ -164,6 +169,8 @@ docker run --rm -p 127.0.0.1:3000:3000 --env-file .env \
 ```
 
 打开 <http://127.0.0.1:3000> 即可。想先不配 key 看效果，打开 <http://127.0.0.1:3000/?demo=1> 或点表单里的「试试演示（无需 Key）」——回放一段预置报告，不调用模型。
+
+**安装为应用（PWA）：** 在 Chrome / Edge（桌面，或手机经 HTTPS 访问）打开应用，点地址栏的安装图标——或页头出现的「安装应用」按钮——即可装到桌面/主屏幕，以独立窗口运行（外壳离线也能打开）。
 
 ### 方式二：本地跑源码
 
@@ -276,7 +283,7 @@ python scripts/build-media.py                         # demo.gif、social-previe
 
 ```bash
 npm run ci        # check → typecheck → lint → format:check → test
-npm run test      # 41 个测试：提示词 7 + i18n 4 + 预置报告 3 + 离线引擎 10 + 服务集成 17
+npm run test      # 45 个测试：提示词、i18n、预置报告、离线引擎、服务集成
 npm run typecheck # tsc --noEmit（JSDoc 类型）
 ```
 

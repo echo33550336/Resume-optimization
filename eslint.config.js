@@ -27,12 +27,12 @@ module.exports = [
     },
   },
   {
-    // Browser side: classic script, translated by the i18n runtime.
-    files: ['public/i18n.js'],
+    // Browser side: classic scripts — the page bundle and the service worker.
+    files: ['public/i18n.js', 'public/sw.js'],
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: 'script',
-      globals: { ...globals.browser },
+      globals: { ...globals.browser, ...globals.serviceworker },
     },
   },
   {
