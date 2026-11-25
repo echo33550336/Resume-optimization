@@ -23,6 +23,8 @@
   <a href="docs/assets/screenshot-result.png">Result screenshot</a>
   &nbsp;·&nbsp;
   <a href="#quick-start">Run it locally</a>
+  &nbsp;·&nbsp;
+  <a href="docs/getting-started.md">Step-by-step guide</a>
 </p>
 
 ---
@@ -194,6 +196,9 @@ resume-optimizer/
 ```
 
 ## Quick start
+
+> Want a walkthrough instead — setup, first report, PWA install, FAQ?
+> Read [docs/getting-started.md](docs/getting-started.md) (中文版：[docs/getting-started.zh-CN.md](docs/getting-started.zh-CN.md)).
 
 Prerequisites: **Node.js 18+** (needs the global `fetch`).
 

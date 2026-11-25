@@ -23,6 +23,8 @@
   <a href="docs/assets/screenshot-result-zh.png">结果截图</a>
   &nbsp;·&nbsp;
   <a href="#快速开始">在本地运行</a>
+  &nbsp;·&nbsp;
+  <a href="docs/getting-started.zh-CN.md">上手指南</a>
 </p>
 
 ---
@@ -155,6 +157,9 @@ Resume-optimization/
 ```
 
 ## 快速开始
+
+> 想要一步步的完整教程（配置 → 第一份报告 → 装成 App → 常见问题）？
+> 看 [docs/getting-started.zh-CN.md](docs/getting-started.zh-CN.md)（English: [docs/getting-started.md](docs/getting-started.md)）。
 
 ### 方式一：用现成镜像（最快）
 
