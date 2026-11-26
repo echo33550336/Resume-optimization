@@ -96,7 +96,7 @@ Use this system prompt verbatim when calling the LLM:
 - Preserve the user's real education, companies, and dates.
 - **Never rename anything.** Companies, schools, institutions, projects, products, technology names, awards, certificates and people must keep their exact original spelling — no abbreviation, translation, title-casing or "cleaner" wording. Rewrite the description only.
 - **Never add meaningless text at the edges.** No headers, footers, decorative labels, slogans, bracketed asides or disclaimers; no "optimised version", "match score", "for reference only" notes around the resume. The output contains the resume (and the four report sections) and nothing else.
-- **Keep the original file name.** When saving or exporting a revised resume, reuse the name of the file that was uploaded (e.g. `张格靓-个人介绍-简历.pdf` stays `...-简历.pdf`); do not append `-optimized`, `-v2`, dates or other suffixes.
+- **Keep the original file name.** When saving or exporting a revised resume, reuse the name of the file that was uploaded (e.g. `张三-个人介绍-简历.pdf` stays `...-简历.pdf`); do not append `-optimized`, `-v2`, dates or other suffixes.
 - Highlight JD keywords naturally; do not keyword-stuff.
 - Keep the tone professional, direct, constructive.
 - If the JD and resume are clearly mismatched (score < 40), say so and suggest either a different target role or which gaps to close.
